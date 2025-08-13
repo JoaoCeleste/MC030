@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Unicamp Map Game</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body { margin: 0; padding: 0; background: #000; }
+    #map { height: 100vh; width: 100vw; }
+    .joystick {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 120px;
+      height: 120px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 50%;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .stick {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="joystick" id="joystick">
+    <div class="stick" id="stick"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Initialize map without labels using Carto light tiles without text overlay
+    const map = L.map('map', {
+      zoomControl: false,
+      attributionControl: false
+    }).setView([-22.817, -47.068], 17);
+
+    // This style removes most labels by using a custom tile server
+    L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: ''
+    }).addTo(map);
+
+    let playerPos = [-22.817, -47.068];
+    const playerMarker = L.marker(playerPos).addTo(map);
+
+    const joystick = document.getElementById('joystick');
+    const stick = document.getElementById('stick');
+    let centerX, centerY;
+
+    joystick.addEventListener('touchstart', (e) => {
+      const rect = joystick.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+    });
+
+    joystick.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const dx = touch.clientX - centerX;
+      const dy = touch.clientY - centerY;
+
+      // Limit stick movement radius
+      const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+      const angle = Math.atan2(dy, dx);
+      const offsetX = dist * Math.cos(angle);
+      const offsetY = dist * Math.sin(angle);
+      stick.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+      // Update player position based on joystick movement
+      playerPos[0] += -offsetY * 0.00001;
+      playerPos[1] += offsetX * 0.00001;
+      playerMarker.setLatLng(playerPos);
+      map.setView(playerPos);
+    });
+
+    joystick.addEventListener('touchend', () => {
+      stick.style.transform = 'translate(0,0)';
+    });
+  </script>
+</body>
+</html>
