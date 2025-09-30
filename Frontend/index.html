@@ -52,6 +52,12 @@
   <div class="joystick" id="joystick">
     <div class="stick" id="stick"></div>
   </div>
+  <div id="medals" style="position:fixed; top:20px; right:20px; 
+  background:rgba(255,255,255,0.8); padding:10px; border-radius:12px; 
+  z-index:1500; display:flex; flex-wrap:wrap; gap:5px; max-width:150px;">
+    <h4 style="margin:0 0 5px 0; width:100%;">Medals</h4>
+  </div>
+
 
   <div id="quizModal">
     <h2 id="quizTitle"></h2>
@@ -90,6 +96,7 @@
       {
         name: "IFGW - Instituto de Física",
         coords: [-22.817519201512976, -47.067349571393784],
+        medal: "🔭 Medalha de Física",
         quiz: [
           {
             q: "What is the speed of light in vacuum?",
@@ -102,6 +109,7 @@
       {
         name: "IMECC - Instituto de Matemática e Ciência da Computação",
         coords: [-22.81577381481928, -47.067741816556705],
+        medal: " Medalha de Matemática",
         quiz: [
           {
             q: "What is the speed of light in vacuum?",
@@ -131,7 +139,8 @@
         btn.textContent = opt;
         btn.onclick = () => {
           if (i === q.answer) {
-            alert("Correct! 🏅 You won a medal!");
+            alert("Correct! 🏅 You won the " + gym.medal + "!");
+            awardMedal(gym.medal);
           } else {
             alert("Wrong answer ❌ Try again!");
           }
@@ -183,6 +192,25 @@
       movementX = 0;
       movementY = 0;
     }
+
+    let earnedMedals = [];
+    function awardMedal(medal) {
+      if (!earnedMedals.includes(medal)) {
+        earnedMedals.push(medal);
+        updateMedalsDisplay();
+      }
+    }
+
+    function updateMedalsDisplay() {
+      const medalDiv = document.getElementById("medals");
+      medalDiv.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medals</h4>";
+      earnedMedals.forEach(medal => {
+        const span = document.createElement("span");
+        span.textContent = medal;
+        medalDiv.appendChild(span);
+      });
+}
+
 
     joystick.addEventListener('touchstart', e => startInput(e.touches[0].clientX, e.touches[0].clientY));
     joystick.addEventListener('touchmove', e => { e.preventDefault(); moveInput(e.touches[0].clientX, e.touches[0].clientY); });
