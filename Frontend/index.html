@@ -59,12 +59,20 @@
   </div>
 
 
-  <div id="quizModal">
-    <h2 id="quizTitle"></h2>
-    <p id="quizQuestion"></p>
-    <div id="quizOptions"></div>
-    <button onclick="closeQuiz()">Close</button>
+  <div id="quizModal" style="display:none; position:fixed; top:10%; left:50%;
+  transform:translateX(-50%); background:white; padding:20px; border-radius:12px;
+  z-index:2000; width:350px; max-width:90%;">
+    <img id="characterImg" src="" alt="Character" style="width:100px; border-radius:50%;">
+    <h3 id="characterName"></h3>
+    <p id="characterText"></p>
+    <div id="quizContent" style="display:none;">
+      <h2 id="quizTitle"></h2>
+      <p id="quizQuestion"></p>
+      <div id="quizOptions"></div>
+    </div>
+    <button id="nextBtn">Next</button>
   </div>
+
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
@@ -97,6 +105,15 @@
         name: "IFGW - Instituto de Física",
         coords: [-22.817519201512976, -47.067349571393784],
         medal: "🔭 Medalha de Física",
+        character: {
+        name: "Albert Einstein",
+        img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
+        intro: [
+          "Hello there! I'm Albert Einstein, welcome to the Physics Institute.",
+          "Physics helps us understand how the universe works — from atoms to galaxies.",
+          "Let’s see how much you know!"
+        ]
+      },
         quiz: [
           {
             q: "What is the speed of light in vacuum?",
@@ -128,26 +145,57 @@
 
     // Quiz logic
     function openQuiz(gym) {
-      document.getElementById("quizModal").style.display = "block";
-      document.getElementById("quizTitle").textContent = gym.name;
-      const q = gym.quiz[0];
-      document.getElementById("quizQuestion").textContent = q.q;
-      const optionsDiv = document.getElementById("quizOptions");
-      optionsDiv.innerHTML = "";
-      q.options.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.onclick = () => {
-          if (i === q.answer) {
-            alert("Correct! 🏅 You won the " + gym.medal + "!");
-            awardMedal(gym.medal);
-          } else {
-            alert("Wrong answer ❌ Try again!");
-          }
-        };
-        optionsDiv.appendChild(btn);
-      });
+      const modal = document.getElementById("quizModal");
+      const nextBtn = document.getElementById("nextBtn");
+      const charImg = document.getElementById("characterImg");
+      const charName = document.getElementById("characterName");
+      const charText = document.getElementById("characterText");
+      const quizContent = document.getElementById("quizContent");
+
+      modal.style.display = "block";
+      charImg.src = gym.character.img;
+      charName.textContent = gym.character.name;
+      quizContent.style.display = "none";
+
+      let index = 0;
+      charText.textContent = gym.character.intro[index];
+
+      nextBtn.onclick = () => {
+        index++;
+        if (index < gym.character.intro.length) {
+          charText.textContent = gym.character.intro[index];
+        } else {
+          // move to quiz
+          charText.textContent = "";
+          nextBtn.style.display = "none";
+          showQuiz(gym);
+        }
+      };
     }
+
+  function showQuiz(gym) {
+    const quizContent = document.getElementById("quizContent");
+    quizContent.style.display = "block";
+    document.getElementById("quizTitle").textContent = gym.name;
+    const q = gym.quiz[0];
+    document.getElementById("quizQuestion").textContent = q.q;
+    const optionsDiv = document.getElementById("quizOptions");
+    optionsDiv.innerHTML = "";
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (i === q.answer) {
+          alert("Correct! 🏅 You won the " + gym.medal + "!");
+          awardMedal(gym.medal);
+        } else {
+          alert("Wrong answer ❌ Try again!");
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
+  }
+
 
     function closeQuiz() {
       document.getElementById("quizModal").style.display = "none";
