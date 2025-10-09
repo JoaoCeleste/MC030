@@ -31,14 +31,24 @@
     #quizModal {
       display: none;
       position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    #quizBox {
+      margin: auto;
+      background: #1c1c1e;
+      color: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
       padding: 20px;
-      border-radius: 12px;
-      z-index: 2000;
-      width: 300px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(255,255,255,0.15);
     }
     #quizOptions button {
       display: block;
@@ -59,19 +69,57 @@
   </div>
 
 
-  <div id="quizModal" style="display:none; position:fixed; top:10%; left:50%;
-  transform:translateX(-50%); background:white; padding:20px; border-radius:12px;
-  z-index:2000; width:350px; max-width:90%;">
-    <img id="characterImg" src="" alt="Character" style="width:100px; border-radius:50%;">
-    <h3 id="characterName"></h3>
-    <p id="characterText"></p>
-    <div id="quizContent" style="display:none;">
-      <h2 id="quizTitle"></h2>
-      <p id="quizQuestion"></p>
-      <div id="quizOptions"></div>
+<div id="quizModal"
+  style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
+
+  <div id="quizBox"
+    style="background:#1c1c1e; color:white; border-radius:20px; width:90%;
+    max-width:600px; padding:20px; position:relative; overflow:hidden;">
+
+    <button id="closeQuiz"
+      style="position:absolute; top:10px; right:15px; background:none;
+      color:white; border:none; font-size:1.5rem; cursor:pointer;">✖</button>
+
+    <div style="display:flex; flex-direction:row; align-items:flex-start; gap:20px;">
+      <img id="characterImg"
+        src=""
+        alt="Character"
+        style="width:120px; height:120px; border-radius:50%; object-fit:cover;
+        box-shadow:0 0 10px rgba(255,255,255,0.3);">
+      <div style="flex:1;">
+        <h3 id="characterName" style="margin:0; font-size:1.4rem; color:#ffcb05;"></h3>
+        <p id="characterText" style="margin-top:10px; line-height:1.4;"></p>
+      </div>
     </div>
-    <button id="nextBtn">Next</button>
+
+    <div id="quizContent" style="display:none; margin-top:20px;">
+      <h2 id="quizTitle" style="font-size:1.2rem; color:#ffa500;"></h2>
+      <p id="quizQuestion" style="margin:10px 0;"></p>
+      <div id="quizOptions"
+        style="display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+
+    <button id="nextBtn"
+      style="margin-top:15px; background:#ffcb05; color:black;
+      border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">
+      Next
+    </button>
   </div>
+</div>
+
+<div id="poiModal" style="display:none; position:fixed; inset:0;
+ background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:3000;
+ justify-content:center; align-items:center;">
+  <div id="poiBox" style="background:rgba(28,28,30,0.95); color:white;
+   border-radius:20px; padding:20px; max-width:600px; width:90%;
+   display:flex; flex-direction:column; align-items:center; text-align:center;">
+    <img id="poiImg" src="" alt="POI" style="width:100%; border-radius:12px; margin-bottom:15px; max-height:250px; object-fit:cover;">
+    <h2 id="poiTitle"></h2>
+    <p id="poiText" style="font-size:1.1em; line-height:1.4;"></p>
+    <button id="closePoiBtn" style="margin-top:15px;">Close</button>
+  </div>
+</div>
 
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -87,6 +135,7 @@
     }).addTo(map);
 
     let playerPos = [-22.817, -47.068];
+    const ACCESS_RADIUS = 50; // meters to be considered "close enough"
     const playerMarker = L.marker(playerPos).addTo(map);
 
     // Custom red icon for gyms
@@ -119,53 +168,133 @@
             q: "What is the speed of light in vacuum?",
             options: ["3 x 10^8 m/s", "1.5 x 10^7 m/s", "9.8 m/s^2"],
             answer: 0
+          },
+          {
+            q: "Which Newton Law states that for every action, there is an equal and opposite reaction",
+            options: ["First", "Second", "Third"],
+            answer: 2
           }
         ]
       },
+      
       
       {
         name: "IMECC - Instituto de Matemática e Ciência da Computação",
         coords: [-22.81577381481928, -47.067741816556705],
         medal: " Medalha de Matemática",
+        character: {
+          name: "Pythagoras",
+          img: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Pythagoras_of_Samos.jpg",
+          intro: [
+            "Greetings, traveler! I am Pythagoras of Samos.",
+            "Here at IMECC, we unravel the secrets of numbers and shapes.",
+            "Are you ready to test your mathematical insight?"
+          ]
+        },
         quiz: [
           {
-            q: "What is the speed of light in vacuum?",
-            options: ["3 x 10^8 m/s", "1.5 x 10^7 m/s", "9.8 m/s^2"],
+            q: "What does the Pythagorean theorem state?",
+            options: [
+              "a² + b² = c²",
+              "E = mc²",
+              "F = ma"
+            ],
             answer: 0
           }
         ]
       }
 
     ];
+  const poiIcon = L.icon({
+    iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', // or your own URL
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
+
+  const pointsOfInterest = [
+  {
+    name: "Biblioteca Central",
+    coords: [-22.8172, -47.0685],
+    img: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Biblioteca_Central_Unicamp.jpg",
+    text: "Welcome to the Central Library — one of the most iconic places at Unicamp, where knowledge from every field converges."
+  },
+  {
+    name: "Museu Exploratório de Ciências",
+    coords: [-22.8192, -47.0669],
+    img: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Museu_Exploratorio_Unicamp.jpg",
+    text: "Here, science comes alive! The Exploratory Museum invites everyone to experiment and learn through play."
+  }
+];
+
+
 
     gyms.forEach(gym => {
       const marker = L.marker(gym.coords, { icon: gymIcon }).addTo(map).bindTooltip(gym.name);
-      marker.on("click", () => openQuiz(gym));
+      marker.on('click', () => {
+        const dist = getDistanceMeters(
+          playerPos[0],
+          playerPos[1],
+          gym.coords[0],
+          gym.coords[1]
+        );
+        if (dist <= ACCESS_RADIUS) {
+          openQuiz(gym);
+        } else {
+          alert(`You're too far from ${gym.name}! Move closer to interact.`);
+        }
+      });
+
     });
+
+  pointsOfInterest.forEach(poi => {
+    const marker = L.marker(poi.coords, { icon: poiIcon }).addTo(map);
+    marker.on('click', () => {
+      const dist = getDistanceMeters(
+        playerPos[0], playerPos[1],
+        poi.coords[0], poi.coords[1]
+      );
+      if (dist <= ACCESS_RADIUS) {
+        openPOI(poi);
+      } else {
+        alert(`You're too far from ${poi.name}! Move closer to explore it.`);
+      }
+    });
+  });
+
+
 
     // Quiz logic
     function openQuiz(gym) {
       const modal = document.getElementById("quizModal");
+      const box = document.getElementById("quizBox");
       const nextBtn = document.getElementById("nextBtn");
+      const closeBtn = document.getElementById("closeQuiz");
       const charImg = document.getElementById("characterImg");
       const charName = document.getElementById("characterName");
       const charText = document.getElementById("characterText");
       const quizContent = document.getElementById("quizContent");
 
-      modal.style.display = "block";
+      modal.style.display = "flex";
+      quizContent.style.display = "none";
+      nextBtn.style.display = "inline-block";
+
       charImg.src = gym.character.img;
       charName.textContent = gym.character.name;
-      quizContent.style.display = "none";
-
       let index = 0;
       charText.textContent = gym.character.intro[index];
 
+      // Handle closing
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+
+      // Next dialogue → then quiz
       nextBtn.onclick = () => {
         index++;
         if (index < gym.character.intro.length) {
           charText.textContent = gym.character.intro[index];
         } else {
-          // move to quiz
+          // Switch to quiz
           charText.textContent = "";
           nextBtn.style.display = "none";
           showQuiz(gym);
@@ -173,33 +302,66 @@
       };
     }
 
-  function showQuiz(gym) {
-    const quizContent = document.getElementById("quizContent");
-    quizContent.style.display = "block";
-    document.getElementById("quizTitle").textContent = gym.name;
-    const q = gym.quiz[0];
-    document.getElementById("quizQuestion").textContent = q.q;
-    const optionsDiv = document.getElementById("quizOptions");
-    optionsDiv.innerHTML = "";
-    q.options.forEach((opt, i) => {
-      const btn = document.createElement("button");
-      btn.textContent = opt;
-      btn.onclick = () => {
-        if (i === q.answer) {
-          alert("Correct! 🏅 You won the " + gym.medal + "!");
-          awardMedal(gym.medal);
-        } else {
-          alert("Wrong answer ❌ Try again!");
-        }
-      };
-      optionsDiv.appendChild(btn);
-    });
-  }
+    function showQuiz(gym) {
+      const quizContent = document.getElementById("quizContent");
+      const quizTitle = document.getElementById("quizTitle");
+      const quizQuestion = document.getElementById("quizQuestion");
+      const optionsDiv = document.getElementById("quizOptions");
+      const nextBtn = document.getElementById("nextBtn");
+
+      let currentQ = 0;
+      const totalQ = gym.quiz.length;
+
+      function loadQuestion() {
+        const q = gym.quiz[currentQ];
+        quizTitle.textContent = gym.name + ` (${currentQ + 1}/${totalQ})`;
+        quizQuestion.textContent = q.q;
+        optionsDiv.innerHTML = "";
+
+        q.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.onclick = () => {
+            if (i === q.answer) {
+              alert("✅ Correct!");
+              currentQ++;
+              if (currentQ < totalQ) {
+                loadQuestion();
+              } else {
+                alert("🏅 You won the " + gym.medal + "!");
+                awardMedal(gym.medal);
+                document.getElementById("quizModal").style.display = "none";
+              }
+            } else {
+              alert("❌ Wrong answer. Try again!");
+            }
+          };
+          optionsDiv.appendChild(btn);
+        });
+      }
+
+      quizContent.style.display = "block";
+      loadQuestion();
+    }
+
 
 
     function closeQuiz() {
       document.getElementById("quizModal").style.display = "none";
     }
+
+    function openPOI(poi) {
+      const modal = document.getElementById("poiModal");
+      document.getElementById("poiImg").src = poi.img;
+      document.getElementById("poiTitle").textContent = poi.name;
+      document.getElementById("poiText").textContent = poi.text;
+      modal.style.display = "flex";
+    }
+
+    document.getElementById("closePoiBtn").onclick = () => {
+      document.getElementById("poiModal").style.display = "none";
+    };
+
 
     const joystick = document.getElementById('joystick');
     const stick = document.getElementById('stick');
@@ -258,6 +420,20 @@
         medalDiv.appendChild(span);
       });
 }
+        // Returns distance in meters between two lat/lon points
+    function getDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Earth radius in meters
+      const toRad = x => (x * Math.PI) / 180;
+      const φ1 = toRad(lat1);
+      const φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1);
+      const Δλ = toRad(lon2 - lon1);
+      const a =
+        Math.sin(Δφ / 2) ** 2 +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
 
 
     joystick.addEventListener('touchstart', e => startInput(e.touches[0].clientX, e.touches[0].clientY));
