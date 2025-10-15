@@ -138,6 +138,9 @@
     const ACCESS_RADIUS = 50; // meters to be considered "close enough"
     const playerMarker = L.marker(playerPos).addTo(map);
 
+
+
+
     // Custom red icon for gyms
     const gymIcon = new L.Icon({
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -153,98 +156,172 @@
       {
         name: "IFGW - Instituto de Física",
         coords: [-22.817519201512976, -47.067349571393784],
-        medal: "🔭 Medalha de Física",
+        medal: "🏅 Medalha de Física",
         character: {
         name: "Albert Einstein",
         img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
         intro: [
-          "Hello there! I'm Albert Einstein, welcome to the Physics Institute.",
-          "Physics helps us understand how the universe works — from atoms to galaxies.",
-          "Let’s see how much you know!"
+          "Seja bem vindo ao Instituto de Física Gleb Wataghin (IFGW)! Eu sou Albert Einstein, vou ser seu guia nesta jornada.",
+          "A física nos ajuda a entender como o universo funciona, das coisas mais pequenas como átomos até gigantescas como galáxias.",
+          "O IFGW foi fundado em 1966 com o intuito de disseminar e explorar essa área do conhecimento.",
+          "Você sabia que,dentre outros avanços, em 1972 aqui no Instituto foram produzidos os primeiros cristais semi condutores da América Latina?",
+          "Mas agora vamos colocar a prova o que você sabe."
         ]
       },
         quiz: [
           {
-            q: "What is the speed of light in vacuum?",
+            q: "Consegue me dizer qual é velocidade da luz no vácuo?",
             options: ["3 x 10^8 m/s", "1.5 x 10^7 m/s", "9.8 m/s^2"],
             answer: 0
           },
           {
-            q: "Which Newton Law states that for every action, there is an equal and opposite reaction",
-            options: ["First", "Second", "Third"],
+            q: "Qual das leis que eu propus descreve que toda ação exige uma reação?",
+            options: ["Primeira", "Segunda", "Terceira"],
             answer: 2
+          },
+          {
+            q: "Na parte de tráz do IFGW em um corredor podemos encontrar a direita os quatro diferentes departamentos, tomando o sentido CB -> IFGW qual o departamento de Fisica Aplicada se encontra em qual porta?",
+            options: ["Primeira", "Segunda", "Terceira", "Quarta"],
+            answer: 3
           }
         ]
       },
       
       
       {
-        name: "IMECC - Instituto de Matemática e Ciência da Computação",
+        name: "IMECC - Instituto de Matemática, Estatística Computação Científica",
         coords: [-22.81577381481928, -47.067741816556705],
-        medal: " Medalha de Matemática",
+        medal: "🏅 Medalha de Matemática",
         character: {
-          name: "Pythagoras",
-          img: "https://upload.wikimedia.org/wikipedia/commons/4/4b/Pythagoras_of_Samos.jpg",
+          name: "Pitágoras",
+          img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Kapitolinischer_Pythagoras_adjusted.jpg/400px-Kapitolinischer_Pythagoras_adjusted.jpg",
           intro: [
-            "Greetings, traveler! I am Pythagoras of Samos.",
-            "Here at IMECC, we unravel the secrets of numbers and shapes.",
-            "Are you ready to test your mathematical insight?"
+            "Saudações viajante! Eu sou Pitágoras da cidade de Salmos.",
+            "Bem vindo ao Instituto de Matemática, Estatística Computação Científica (IMECC), onde exploramos o fantástico mundo dos números.",
+            "A matemática está presente em quase tudo que podemos presenciar, de uma pequena compra no supermecado até aos cálculos que nos permitiram pisar na lua.",
+            "Desde 1968 o IMECC vem ensinando e formando não apenas matématicos, como também a base de conhecimento que muitas outras áreas da ciência precisam para serem exercidas",
+            "Vamos ver o quão familiar você é com tudo isso."
           ]
         },
         quiz: [
           {
-            q: "What does the Pythagorean theorem state?",
+            q: "Sabe me dizer o que o teorema que eu formulei diz?",
             options: [
               "a² + b² = c²",
               "E = mc²",
               "F = ma"
             ],
             answer: 0
+          },
+          {
+            q: "Dentro do IMECC, na parte dos fundos você vai encontrar escadas que se assemlham muito a uma forma gomética, sabe dizer qual é ela?",
+            options: [
+              "Triângulo",
+              "Helicóide",
+              "Círculo"
+            ],
+            answer: 1
+          },
+          {
+            q: "Também dentro do IMECC temos um anfiteatro com um formato bem caracteristico, ele é:",
+            options: [
+              "Esferico",
+              "Quadrado",
+              "Círcular"
+            ],
+            answer: 2
+          },
+          {
+            q: "Sabe dizer qual a formula que descreve a forma da última pergunta considerando um eixe cartesiano e com centro em (0,0)?",
+            options: [
+              "X^2 + Y^2 = R^2",
+              "X^2 + Y^2 + Z^2 = R^2",
+              "X^2/A^2 + Y^2/B^2 = 1"
+            ],
+            answer: 0
+          },
+        ],
+
+      },
+
+
+      {
+        name: "Unicamp",
+        coords: [-22.817084, -47.069732],
+        medal: "🏅Medalha da Unicamp",
+        character:{
+          name: "Zeferino Vaz",
+          img:"https://upload.wikimedia.org/wikipedia/commons/f/f5/Zeferino_Vaz_%28cropped%29.jpg",
+          intro: [
+            "Bem vindo ao ultimo desafio. Meu nome é Zeferino Vaz, eu sou responsável pela construção da Unicamp",
+            "Vejo que você provou ter conhecimentos das mais diversas áreas para chegar aqui, e ainda por cima é um bom observador",
+            "É importante entender como as coisas funcionam, mas não podemos deixar de focar no que está a nossa volta.",
+            "Vamos ver se você tem prestado atenção na minha criação como um todo"
+          ]
+        },
+        quiz: [
+          {
+            q: "O Ciclo Básico segue uma organização bem simples quanto ao número das salas, qual dessas é a correta",
+            options: [
+              "Um dos lados contém salas de números pares e outro de número impar",
+              "As salas menores contém numeração menor e as salas maiores contém numeração maior ",
+              "As salas menores e maiores tem numeração independentes umas das outras"
+            ],
+            answer: 0
           }
-        ]
+        ],
+        locked: true
       }
 
     ];
   const poiIcon = L.icon({
-    iconUrl: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png', // or your own URL
-    iconSize: [32, 32],
-    iconAnchor: [16, 32]
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png', // or your own URL
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
   });
 
   const pointsOfInterest = [
   {
-    name: "Biblioteca Central",
-    coords: [-22.8172, -47.0685],
-    img: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Biblioteca_Central_Unicamp.jpg",
-    text: "Welcome to the Central Library — one of the most iconic places at Unicamp, where knowledge from every field converges."
+    name: "Ciclo Básico I (CB)",
+    coords: [-22.817533 , -47.068635],
+    img: "https://www.basico.unicamp.br/wp-content/uploads/2022/05/cropped-Ciclo_Basico_UNICAMP_2015-e1653046999846.jpg",
+    text: "Inaugurado em 1972, o Ciclo Básico 1 é um conjunto de salas de uso multidisciplinar que é um ponto de convergência de alunos e professores de diversos cursos. Criando assim um ambiente heterogênio de ensino que permite com que os alunos não só aprofundem seus conhecimentos acadêmicos, como também estabeleçam laços profundos com seus colegas."
   },
   {
-    name: "Museu Exploratório de Ciências",
-    coords: [-22.8192, -47.0669],
-    img: "https://upload.wikimedia.org/wikipedia/commons/7/7b/Museu_Exploratorio_Unicamp.jpg",
-    text: "Here, science comes alive! The Exploratory Museum invites everyone to experiment and learn through play."
+    name: "Restaurante Universitário (RU)",
+    coords: [-22.817472, -47.071710],
+    img: "https://unicamp.br/unicamp/sites/default/files/2020-03/com_bandejao_20200323.jpg",
+    text: "Fundado em 1976, o Restaurante Universitário , que acabou ficando conhecido popularmente como Bandejão, se tornou uma parte vital da vida no campus. Promovendo uma alimentação acessível dentro do campus permite com que os alunos foquem seus esforços integralmente nos estudos"
   }
 ];
 
 
+    
 
     gyms.forEach(gym => {
-      const marker = L.marker(gym.coords, { icon: gymIcon }).addTo(map).bindTooltip(gym.name);
-      marker.on('click', () => {
-        const dist = getDistanceMeters(
-          playerPos[0],
-          playerPos[1],
-          gym.coords[0],
-          gym.coords[1]
-        );
-        if (dist <= ACCESS_RADIUS) {
-          openQuiz(gym);
-        } else {
-          alert(`You're too far from ${gym.name}! Move closer to interact.`);
-        }
-      });
+    // skip locked gyms (like the final one)
+    if (gym.locked) return;
 
+    const marker = L.marker(gym.coords, { icon: gymIcon })
+      .addTo(map)
+      .bindTooltip(gym.name);
+
+    marker.on('click', () => {
+      const dist = getDistanceMeters(
+        playerPos[0],
+        playerPos[1],
+        gym.coords[0],
+        gym.coords[1]
+      );
+
+      if (dist <= ACCESS_RADIUS) {
+        openQuiz(gym);
+      } else {
+        alert(`You're too far from ${gym.name}! Move closer to interact.`);
+      }
     });
+  });
+
 
   pointsOfInterest.forEach(poi => {
     const marker = L.marker(poi.coords, { icon: poiIcon }).addTo(map);
@@ -403,23 +480,45 @@
       movementY = 0;
     }
 
+
+  
+
     let earnedMedals = [];
+
     function awardMedal(medal) {
       if (!earnedMedals.includes(medal)) {
         earnedMedals.push(medal);
         updateMedalsDisplay();
+        checkFinalGymUnlock();
       }
     }
 
     function updateMedalsDisplay() {
-      const medalDiv = document.getElementById("medals");
-      medalDiv.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medals</h4>";
+      const container = document.getElementById("medals");
+      container.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medals</h4>";
       earnedMedals.forEach(medal => {
         const span = document.createElement("span");
         span.textContent = medal;
-        medalDiv.appendChild(span);
+        container.appendChild(span);
       });
-}
+    }
+
+    function checkFinalGymUnlock() {
+      const normalGyms = gyms.filter(g => !g.locked);
+      const finalGym = gyms.find(g => g.locked);
+
+      if (earnedMedals.length >= normalGyms.length && finalGym) {
+        finalGym.locked = false;
+        const marker = L.marker(finalGym.coords, { icon: gymIcon })
+          .addTo(map)
+          .bindTooltip(finalGym.name);
+        marker.on('click', () => openQuiz(finalGym));
+        alert("🎉 Um novo desafio surgiu no centro da Unicamp!");
+      }
+    }
+
+
+
         // Returns distance in meters between two lat/lon points
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
       const R = 6371e3; // Earth radius in meters
