@@ -58,7 +58,74 @@
   </style>
 </head>
 <body>
+
+<div id="titleScreen"
+  style="position:fixed; inset:0; background:linear-gradient(180deg, #002855, #004aad);
+  color:white; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:4000; font-family:'Poppins', sans-serif; text-align:center;">
+  
+  <h1 style="font-size:3em; margin-bottom:0.5em; text-shadow:0 0 10px #fff;">Unicamp Explorer</h1>
+  <p style="max-width:400px; font-size:1.2em; margin-bottom:1.5em;">
+    Explore a Unicamp e teste seus conhecimentos contra figuras históricas
+  </p>
+  <button id="startButton"
+    style="padding:15px 40px; font-size:1.2em; background:#ffcb05; color:black;
+    border:none; border-radius:12px; cursor:pointer; font-weight:bold; box-shadow:0 0 15px rgba(0,0,0,0.3);">
+    Começar Exploração
+  </button>
+</div>
+
+
+
+
+
   <div id="map"></div>
+  <div id="tutorialOverlay"
+  style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  color:white; z-index:3000; justify-content:center; align-items:center;
+  flex-direction:column; text-align:center; padding:20px; backdrop-filter:blur(6px);">
+
+  <div style="background:rgba(28,28,30,0.95); border-radius:20px; padding:20px; max-width:500px;">
+    <h2>Como jogar</h2>
+    <p style="font-size:1.1em; line-height:1.5;">
+      Use o JoyStick para andar pelo mapa.<br>
+      Se aproxime de um instituto para desafia-lo, caso consigar vencer o quiz você receberá uma medalha.<br>
+      Não deixe de explorar os pontos de interesse e prestar atenção no ambiente a sua volta.
+    </p>
+    <button id="closeTutorial"
+      style="margin-top:15px; background:#ffcb05; color:black; border:none;
+      padding:10px 25px; border-radius:10px; font-size:1em; cursor:pointer;">
+      Entendi!
+    </button>
+  </div>
+</div>
+
+<div id="legend"
+  style="position:fixed; top:20px; left:20px; background:rgba(28,28,30,0.85);
+  color:white; border-radius:12px; padding:12px 16px; z-index:1500;
+  font-size:0.9em; line-height:1.5; max-width:220px; box-shadow:0 0 10px rgba(0,0,0,0.3);">
+
+  <h4 style="margin:0 0 8px 0; font-size:1em; color:#ffcb05; text-align:center;">
+    Legenda
+  </h4>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png" width="25" height="41" alt="Gym">
+    <span>Institutos</span>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png" width="25" height="41" alt="POI">
+    <span>Pontos de Interesse</span>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png" width="25" height="41" alt="Plyer">
+    <span>Jogador</span>
+  </div>
+
+</div>
+
   <div class="joystick" id="joystick">
     <div class="stick" id="stick"></div>
   </div>
@@ -151,7 +218,7 @@
       shadowSize: [41, 41]
     });
 
-    // Gyms (starting with IFGW)
+    // Gyms 
     const gyms = [
       {
         name: "IFGW - Instituto de Física",
@@ -275,7 +342,7 @@
 
     ];
   const poiIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png', // or your own URL
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41]
   });
@@ -444,6 +511,24 @@
     const stick = document.getElementById('stick');
     let centerX, centerY, movementX = 0, movementY = 0;
     const movementSpeed = 0.0000001; // adjust speed here
+
+    // Title screen and tutorial logic
+    const titleScreen = document.getElementById("titleScreen");
+    const tutorialOverlay = document.getElementById("tutorialOverlay");
+    const startButton = document.getElementById("startButton");
+    const closeTutorial = document.getElementById("closeTutorial");
+
+    // When "Start" is clicked, hide title and show tutorial
+    startButton.onclick = () => {
+      titleScreen.style.display = "none";
+      tutorialOverlay.style.display = "flex";
+    };
+
+    // When "Okay" is clicked, hide tutorial and start the game
+    closeTutorial.onclick = () => {
+      tutorialOverlay.style.display = "none";
+    };
+
 
     function updatePlayerPosition() {
       if (movementX !== 0 || movementY !== 0) {
