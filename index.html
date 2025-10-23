@@ -59,6 +59,26 @@
 </head>
 <body>
 
+<!-- RESET MODAL -->
+<div id="resetModal"
+     style="display:none; position:fixed; bottom:20%; left:50%; transform:translate(-50%,0);
+            background:#fff; padding:20px; border-radius:10px; z-index:3000; width:300px;
+            text-align:center;">
+  <p>O progresso das medalhas será resetado e não há opção de desfazer.<br><br>
+     Deseja mesmo continuar?</p>
+  <button id="resetConfirmYes" style="margin:5px;">Sim</button>
+  <button id="resetConfirmNo" style="margin:5px;">Não</button>
+</div>
+
+<!-- RESET BUTTON -->
+<button id="resetButton"
+        style="position:fixed; bottom:20px; right:20px; z-index:2500; padding:10px 15px;
+               border-radius:8px; background:#b00; color:#fff; border:none;">
+  Reset
+</button>
+
+
+
 <div id="titleScreen"
   style="position:fixed; inset:0; background:linear-gradient(180deg, #002855, #004aad);
   color:white; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -568,13 +588,38 @@
 
   
 
-    let earnedMedals = [];
+    function setCookie(name, value, days) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    function getCookie(name) {
+      const cname = name + "=";
+      const decoded = decodeURIComponent(document.cookie);
+      const parts = decoded.split(';');
+      for (let c of parts) {
+        c = c.trim();
+        if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
+      }
+      return "";
+}
+
+
+
+    let earnedMedals = getCookie("medals")
+      ? getCookie("medals").split(",")
+      : [];
+
 
     function awardMedal(medal) {
       if (!earnedMedals.includes(medal)) {
         earnedMedals.push(medal);
         updateMedalsDisplay();
         checkFinalGymUnlock();
+        setCookie("medals", earnedMedals.join(","), 365);
+
       }
     }
 
@@ -602,7 +647,15 @@
       }
     }
 
+      // Load medals from cookie
+    const savedMedals = getCookie("medals");
+    if(savedMedals) earnedMedals = savedMedals.split(',');
 
+    // ✅ Atualiza HUD imediatamente se a função existir
+    if (typeof updateMedalsDisplay === 'function') updateMedalsDisplay();
+
+    // ✅ Verifica se o ginásio final deve aparecer ao iniciar
+    if (typeof checkFinalGymUnlock === 'function') checkFinalGymUnlock();
 
         // Returns distance in meters between two lat/lon points
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
@@ -630,6 +683,27 @@
     function mouseUp() { endInput(); document.removeEventListener('mousemove', mouseMove); document.removeEventListener('mouseup', mouseUp); }
 
     updatePlayerPosition();
+
+
+
+    // ==== RESET MEDALS LOGIC ====
+  document.getElementById("resetButton").onclick = () => {
+    document.getElementById("resetModal").style.display = "block";
+  };
+
+  document.getElementById("resetConfirmNo").onclick = () => {
+    document.getElementById("resetModal").style.display = "none";
+  };
+
+  document.getElementById("resetConfirmYes").onclick = () => {
+    earnedMedals = [];
+    setCookie("medals", "", -1); // limpa cookie
+    updateMedalsDisplay();
+    checkFinalGymUnlock();
+    document.getElementById("resetModal").style.display = "none";
+    toast("Progresso resetado!");
+  };
+
   </script>
 </body>
 </html>
