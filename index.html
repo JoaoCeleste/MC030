@@ -58,6 +58,13 @@
   </style>
 </head>
 <body>
+<!-- TOGGLE MOVEMENT BUTTON -->
+<button id="toggleMovement"
+  style="position:fixed; bottom:70px; right:20px; z-index:2500;
+         padding:10px 15px; border-radius:8px; background:#007bff;
+         color:#fff; border:none;">
+  Modo: Joystick
+</button>
 
 <!-- RESET MODAL -->
 <div id="resetModal"
@@ -702,6 +709,46 @@
     checkFinalGymUnlock();
     document.getElementById("resetModal").style.display = "none";
     toast("Progresso resetado!");
+  };
+
+    // ==== TOGGLE JOYSTICK / GEOLOCATION ====
+  let useJoystick = true;
+  let geoWatchId = null;
+
+  document.getElementById("toggleMovement").onclick = () => {
+    useJoystick = !useJoystick;
+
+    const btn = document.getElementById("toggleMovement");
+    btn.textContent = useJoystick ? "Modo: Joystick" : "Modo: GPS";
+
+    // Mostrar ou esconder o joystick visualmente
+    document.getElementById("joystick").style.display = useJoystick ? "flex" : "none";
+
+    if (!useJoystick) {
+      // Iniciar rastreamento de localização
+      if (navigator.geolocation) {
+        geoWatchId = navigator.geolocation.watchPosition(
+          pos => {
+            playerPos = [pos.coords.latitude, pos.coords.longitude];
+            playerMarker.setLatLng(playerPos);
+            map.setView(playerPos);
+          },
+          err => alert("Erro ao acessar localização: " + err.message),
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+      } else {
+        alert("Geolocalização não suportada neste dispositivo.");
+        useJoystick = true;
+        btn.textContent = "Modo: Joystick";
+        document.getElementById("joystick").style.display = "flex";
+      }
+    } else {
+      // Parar rastreamento GPS
+      if (geoWatchId) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
+    }
   };
 
   </script>
