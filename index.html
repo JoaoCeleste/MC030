@@ -55,6 +55,54 @@
       margin: 5px 0;
       width: 100%;
     }
+
+    .toast {
+      background:rgba(28,28,30,0.95);
+      color:white;
+      border-radius:15px;
+      padding:20px 30px;
+      box-shadow:0 0 30px rgba(0,0,0,0.5);
+      text-align:center;
+      min-width:250px;
+      max-width:400px;
+      animation:slideIn 0.3s ease-out;
+      pointer-events:auto;
+      border-left:4px solid #ffcb05;
+    }
+
+    .toast.error {
+      border-left-color:#ff4444;
+    }
+
+    .toast.success {
+      border-left-color:#44ff44;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity:0;
+        transform:translate(-50%, -60%);
+      }
+      to {
+        opacity:1;
+        transform:translate(-50%, -50%);
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        opacity:1;
+        transform:translate(-50%, -50%);
+      }
+      to {
+        opacity:0;
+        transform:translate(-50%, -60%);
+      }
+    }
+
+    .toast.hide {
+      animation:slideOut 0.3s ease-out forwards;
+    }
   </style>
 </head>
 <body>
@@ -223,6 +271,9 @@
   </div>
 </div>
 
+<div id="toastContainer" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+  z-index:4000; pointer-events:none;">
+</div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
@@ -419,7 +470,7 @@
       if (dist <= ACCESS_RADIUS) {
         openQuiz(gym);
       } else {
-        alert(`You're too far from ${gym.name}! Move closer to interact.`);
+        toast(`Você está longe demais de ${gym.name}! Se aproxime mais.`, 'error');
       }
     });
   });
@@ -435,7 +486,7 @@
       if (dist <= ACCESS_RADIUS) {
         openPOI(poi);
       } else {
-        alert(`You're too far from ${poi.name}! Move closer to explore it.`);
+        toast(`Você está longe demais de ${poi.name}! Se aproxime mais.`, 'error');
       }
     });
   });
@@ -502,17 +553,17 @@
           btn.textContent = opt;
           btn.onclick = () => {
             if (i === q.answer) {
-              alert("✅ Correct!");
+              toast("✅ Resposta correta!", 'success');
               currentQ++;
               if (currentQ < totalQ) {
                 loadQuestion();
               } else {
-                alert("🏅 You won the " + gym.medal + "!");
+                toast("🏅 Você conquistou " + gym.medal + "!", 'success');
                 awardMedal(gym.medal);
                 document.getElementById("quizModal").style.display = "none";
               }
             } else {
-              alert("❌ Wrong answer. Try again!");
+              toast("❌ Resposta errada. Tente novamente!", 'error');
             }
           };
           optionsDiv.appendChild(btn);
@@ -640,7 +691,7 @@
 
     function updateMedalsDisplay() {
       const container = document.getElementById("medals");
-      container.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medals</h4>";
+      container.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medalhas</h4>";
       earnedMedals.forEach(medal => {
         const span = document.createElement("span");
         span.textContent = medal;
@@ -658,7 +709,7 @@
           .addTo(map)
           .bindTooltip(finalGym.name);
         marker.on('click', () => openQuiz(finalGym));
-        alert("🎉 Um novo desafio surgiu no centro da Unicamp!");
+        toast("🎉 Um novo desafio surgiu no centro da Unicamp!", 'success');
       }
     }
 
@@ -741,11 +792,11 @@
             playerMarker.setLatLng(playerPos);
             map.setView(playerPos);
           },
-          err => alert("Erro ao acessar localização: " + err.message),
+          err => toast("Erro ao acessar localização: " + err.message, 'error'),
           { enableHighAccuracy: true, maximumAge: 1000 }
         );
       } else {
-        alert("Geolocalização não suportada neste dispositivo.");
+        toast("Geolocalização não suportada neste dispositivo.", 'error');
         useJoystick = true;
         btn.textContent = "Modo: Joystick";
         document.getElementById("joystick").style.display = "flex";
@@ -796,6 +847,19 @@
   updateResetButtonState();
 
 
+  function toast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toastContainer');
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast ${type}`;
+    toastEl.textContent = message;
+    
+    container.appendChild(toastEl);
+    
+    setTimeout(() => {
+      toastEl.classList.add('hide');
+      setTimeout(() => toastEl.remove(), 300);
+    }, duration);
+  }
   </script>
 </body>
 </html>
