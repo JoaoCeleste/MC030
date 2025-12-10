@@ -277,24 +277,28 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    // Inicializar mapa Leaflet
     const map = L.map('map', {
       zoomControl: false,
       attributionControl: false
     }).setView([-22.817, -47.068], 17);
 
+    // Camada de mapa
     L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
       attribution: ''
     }).addTo(map);
 
+    // Posição inicial do jogador
     let playerPos = [-22.817, -47.068];
-    const ACCESS_RADIUS = 50; // meters to be considered "close enough"
+    // Raio de acesso para interagir com estruturas (em metros)
+    const ACCESS_RADIUS = 50;
     const playerMarker = L.marker(playerPos).addTo(map);
 
 
 
 
-    // Custom red icon for gyms
+    // Ícone vermelho para institutos
     const gymIcon = new L.Icon({
       iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
@@ -304,7 +308,7 @@
       shadowSize: [41, 41]
     });
 
-    // Gyms 
+    // Lista de institutos com quizzes 
     const gyms = [
       {
         name: "IFGW - Instituto de Física",
@@ -427,12 +431,14 @@
       }
 
     ];
+  // Ícone laranja para pontos de interesse
   const poiIcon = L.icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41]
   });
 
+  // Pontos de interesse no campus
   const pointsOfInterest = [
   {
     name: "Ciclo Básico I (CB)",
@@ -451,8 +457,9 @@
 
     
 
+    // Adicionar marcadores dos institutos ao mapa
     gyms.forEach(gym => {
-    // skip locked gyms (like the final one)
+    // Pular institutos bloqueados (desafio final)
     if (gym.locked) return;
 
     const marker = L.marker(gym.coords, { icon: gymIcon })
@@ -476,6 +483,7 @@
   });
 
 
+  // Adicionar marcadores dos pontos de interesse ao mapa
   pointsOfInterest.forEach(poi => {
     const marker = L.marker(poi.coords, { icon: poiIcon }).addTo(map);
     marker.on('click', () => {
@@ -493,7 +501,7 @@
 
 
 
-    // Quiz logic
+    // Lógica para abrir quiz de um instituto
     function openQuiz(gym) {
       const modal = document.getElementById("quizModal");
       const box = document.getElementById("quizBox");
@@ -513,18 +521,18 @@
       let index = 0;
       charText.textContent = gym.character.intro[index];
 
-      // Handle closing
+      // Fechar quiz
       closeBtn.onclick = () => {
         modal.style.display = "none";
       };
 
-      // Next dialogue → then quiz
+      // Próximo diálogo → depois quiz
       nextBtn.onclick = () => {
         index++;
         if (index < gym.character.intro.length) {
           charText.textContent = gym.character.intro[index];
         } else {
-          // Switch to quiz
+          // Mudar para quiz
           charText.textContent = "";
           nextBtn.style.display = "none";
           showQuiz(gym);
@@ -532,6 +540,7 @@
       };
     }
 
+    // Exibir quiz ao jogador
     function showQuiz(gym) {
       const quizContent = document.getElementById("quizContent");
       const quizTitle = document.getElementById("quizTitle");
@@ -539,9 +548,10 @@
       const optionsDiv = document.getElementById("quizOptions");
       const nextBtn = document.getElementById("nextBtn");
 
-      let currentQ = 0;
+      let currentQ = 0;  // Questão atual
       const totalQ = gym.quiz.length;
 
+      // Carregar próxima questão
       function loadQuestion() {
         const q = gym.quiz[currentQ];
         quizTitle.textContent = gym.name + ` (${currentQ + 1}/${totalQ})`;
@@ -580,6 +590,7 @@
       document.getElementById("quizModal").style.display = "none";
     }
 
+    // Abrir modal de ponto de interesse
     function openPOI(poi) {
       const modal = document.getElementById("poiModal");
       document.getElementById("poiImg").src = poi.img;
@@ -593,29 +604,31 @@
     };
 
 
+    // Configurar joystick para movimento
     const joystick = document.getElementById('joystick');
     const stick = document.getElementById('stick');
     let centerX, centerY, movementX = 0, movementY = 0;
-    const movementSpeed = 0.0000001; // adjust speed here
+    const movementSpeed = 0.0000001; // velocidade de movimento
 
-    // Title screen and tutorial logic
+    // Lógica de tela inicial e tutorial
     const titleScreen = document.getElementById("titleScreen");
     const tutorialOverlay = document.getElementById("tutorialOverlay");
     const startButton = document.getElementById("startButton");
     const closeTutorial = document.getElementById("closeTutorial");
 
-    // When "Start" is clicked, hide title and show tutorial
+    
     startButton.onclick = () => {
       titleScreen.style.display = "none";
       tutorialOverlay.style.display = "flex";
     };
 
-    // When "Okay" is clicked, hide tutorial and start the game
+    
     closeTutorial.onclick = () => {
       tutorialOverlay.style.display = "none";
     };
 
 
+    // Atualizar posição do jogador continuamente
     function updatePlayerPosition() {
       if (movementX !== 0 || movementY !== 0) {
         playerPos[0] += -movementY * movementSpeed;
@@ -626,6 +639,7 @@
       requestAnimationFrame(updatePlayerPosition);
     }
 
+    // Iniciar entrada de movimento (joystick)
     function startInput(clientX, clientY) {
       const rect = joystick.getBoundingClientRect();
       centerX = rect.left + rect.width / 2;
@@ -633,6 +647,7 @@
       moveInput(clientX, clientY);
     }
 
+    // Atualizar movimento do joystick
     function moveInput(clientX, clientY) {
       const dx = clientX - centerX;
       const dy = clientY - centerY;
@@ -645,6 +660,7 @@
       movementY = offsetY;
     }
 
+    // Parar movimento
     function endInput() {
       stick.style.transform = 'translate(0,0)';
       movementX = 0;
@@ -654,6 +670,7 @@
 
   
 
+    // Salvar cookie com dados do jogo
     function setCookie(name, value, days) {
       const d = new Date();
       d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -661,6 +678,7 @@
       document.cookie = name + "=" + value + ";" + expires + ";path=/";
     }
 
+    // Recuperar valor do cookie
     function getCookie(name) {
       const cname = name + "=";
       const decoded = decodeURIComponent(document.cookie);
@@ -674,11 +692,12 @@
 
 
 
+    // Carregar medalhas salvas do cookie
     let earnedMedals = getCookie("medals")
       ? getCookie("medals").split(",")
       : [];
 
-
+    // Conceder medalha ao jogador
     function awardMedal(medal) {
       if (!earnedMedals.includes(medal)) {
         earnedMedals.push(medal);
@@ -689,6 +708,7 @@
       }
     }
 
+    // Atualizar exibição de medalhas na interface
     function updateMedalsDisplay() {
       const container = document.getElementById("medals");
       container.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medalhas</h4>";
@@ -699,6 +719,7 @@
       });
     }
 
+    // Desbloquear desafio final quando coletar todas as medalhas
     function checkFinalGymUnlock() {
       const normalGyms = gyms.filter(g => !g.locked);
       const finalGym = gyms.find(g => g.locked);
@@ -713,19 +734,19 @@
       }
     }
 
-      // Load medals from cookie
+      // Carregar medalhas do cookie
     const savedMedals = getCookie("medals");
     if(savedMedals) earnedMedals = savedMedals.split(',');
 
-    // ✅ Atualiza HUD imediatamente se a função existir
+    // Atualiza HUD imediatamente se a função existir
     if (typeof updateMedalsDisplay === 'function') updateMedalsDisplay();
 
-    // ✅ Verifica se o ginásio final deve aparecer ao iniciar
+    // Verifica se o ginásio final deve aparecer ao iniciar
     if (typeof checkFinalGymUnlock === 'function') checkFinalGymUnlock();
 
-        // Returns distance in meters between two lat/lon points
+    // Calcular distância em metros entre dois pontos de coordenadas
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; // Earth radius in meters
+      const R = 6371e3; // Raio da Terra em metros
       const toRad = x => (x * Math.PI) / 180;
       const φ1 = toRad(lat1);
       const φ2 = toRad(lat2);
@@ -739,6 +760,7 @@
 
 
 
+    // Eventos de joystick (toque e mouse)
     joystick.addEventListener('touchstart', e => startInput(e.touches[0].clientX, e.touches[0].clientY));
     joystick.addEventListener('touchmove', e => { e.preventDefault(); moveInput(e.touches[0].clientX, e.touches[0].clientY); });
     joystick.addEventListener('touchend', endInput);
@@ -752,7 +774,7 @@
 
 
 
-    // ==== RESET MEDALS LOGIC ====
+    // ==== LÓGICA DE RESET DE MEDALHAS ====
   document.getElementById("resetButton").onclick = () => {
     document.getElementById("resetModal").style.display = "block";
   };
@@ -770,9 +792,9 @@
     toast("Progresso resetado!");
   };
 
-    // ==== TOGGLE JOYSTICK / GEOLOCATION ====
-  let useJoystick = true;
-  let geoWatchId = null;
+    // ==== ALTERNAR ENTRE JOYSTICK E GPS ====
+  let useJoystick = true;  // Modo joystick ativo por padrão
+  let geoWatchId = null;   // ID do rastreamento GPS
 
   document.getElementById("toggleMovement").onclick = () => {
     useJoystick = !useJoystick;
@@ -810,22 +832,22 @@
     }
   };
 
-    // ==== RESET POSITION BUTTON LOGIC ====
+    // ==== LÓGICA DO BOTÃO DE RESET DE POSIÇÃO ====
   const resetPosButton = document.getElementById("resetPosition");
 
-  // Coordenada inicial do jogo (ajuste conforme o início do seu mapa)
+  // Coordenada inicial do jogador
   const initialPosition = [-22.817, -47.068];
 
-  // Clique no botão de reset de posição
+  // Reset de posição - apenas em modo joystick
   resetPosButton.onclick = () => {
-    if (!useJoystick) return; // só funciona no modo joystick
+    if (!useJoystick) return;  // Funciona apenas no modo joystick
     playerPos = [...initialPosition];
     playerMarker.setLatLng(playerPos);
     map.setView(playerPos);
     toast("Posição resetada para o ponto inicial.");
   };
 
-  // Atualiza visual do botão conforme o modo ativo
+  // Atualizar visual do botão conforme o modo
   function updateResetButtonState() {
     if (useJoystick) {
       resetPosButton.style.background = "#007bff";
@@ -836,17 +858,17 @@
     }
   }
 
-  // Atualiza o estado sempre que mudar o modo
+  // Atualizar estado quando modo muda
   const _oldToggle = document.getElementById("toggleMovement").onclick;
   document.getElementById("toggleMovement").onclick = () => {
     _oldToggle();
     updateResetButtonState();
   };
 
-  // Inicializa estado correto ao carregar
+  // Inicializar estado correto
   updateResetButtonState();
 
-
+  // Mostrar notificação temporária na tela
   function toast(message, type = 'info', duration = 3000) {
     const container = document.getElementById('toastContainer');
     const toastEl = document.createElement('div');
