@@ -78,6 +78,16 @@
       border-left-color:#44ff44;
     }
 
+    .player-sprite {
+      width: 32px;
+      height: 32px;
+      background-image: url('assets/sprite_sheet.png');
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      transform: scale(2);
+      transform-origin: top left;
+    }
+
     @keyframes slideIn {
       from {
         opacity:0;
@@ -143,9 +153,11 @@
 
 
 <div id="titleScreen"
-  style="position:fixed; inset:0; background:linear-gradient(180deg, #002855, #004aad);
+  style="position:fixed; inset:0; background:url('assets/Unicamp_pixelated.png') center center / cover no-repeat;
+  /* fallback gradient in case image fails */
+  background-color:#002855;
   color:white; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:4000; font-family:'Poppins', sans-serif; text-align:center;">
+  z-index:4000; font-family:'Poppins', sans-serif; text-align:center; image-rendering:pixelated;">
   
   <h1 style="font-size:3em; margin-bottom:0.5em; text-shadow:0 0 10px #fff;">Unicamp Explorer</h1>
   <p style="max-width:400px; font-size:1.2em; margin-bottom:1.5em;">
@@ -203,7 +215,7 @@
   </div>
 
   <div style="display:flex; align-items:center; gap:8px;">
-    <img src="https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png" width="25" height="41" alt="Plyer">
+    <img src='assets/Player.png' width="32" height="32" alt="Plyer">
     <span>Jogador</span>
   </div>
 
@@ -289,12 +301,17 @@
       attribution: ''
     }).addTo(map);
 
-    // Posição inicial do jogador
+    // Posição inicial do jogador (declarada antes de usar em playerMarker)
     let playerPos = [-22.817, -47.068];
-    // Raio de acesso para interagir com estruturas (em metros)
-    const ACCESS_RADIUS = 50;
-    const playerMarker = L.marker(playerPos).addTo(map);
 
+    const playerMarker = L.marker(playerPos, {
+      icon: L.divIcon({
+        className: 'player-container',
+        html: '<div class="player-sprite"></div>',
+        iconSize: [32,32],
+        iconAnchor: [16,32]
+      })
+    }).addTo(map)
 
 
 
@@ -608,6 +625,8 @@
     const joystick = document.getElementById('joystick');
     const stick = document.getElementById('stick');
     let centerX, centerY, movementX = 0, movementY = 0;
+    let currentDirection = 0, currentFrame = 1, animationTimer = 0;
+    let lastTime = 0;
     const movementSpeed = 0.0000001; // velocidade de movimento
 
     // Lógica de tela inicial e tutorial
@@ -627,17 +646,8 @@
       tutorialOverlay.style.display = "none";
     };
 
-
-    // Atualizar posição do jogador continuamente
-    function updatePlayerPosition() {
-      if (movementX !== 0 || movementY !== 0) {
-        playerPos[0] += -movementY * movementSpeed;
-        playerPos[1] += movementX * movementSpeed;
-        playerMarker.setLatLng(playerPos);
-        map.setView(playerPos);
-      }
-      requestAnimationFrame(updatePlayerPosition);
-    }
+    
+ 
 
     // Iniciar entrada de movimento (joystick)
     function startInput(clientX, clientY) {
@@ -770,7 +780,6 @@
     function mouseMove(e) { moveInput(e.clientX, e.clientY); }
     function mouseUp() { endInput(); document.removeEventListener('mousemove', mouseMove); document.removeEventListener('mouseup', mouseUp); }
 
-    updatePlayerPosition();
 
 
 
@@ -882,6 +891,57 @@
       setTimeout(() => toastEl.remove(), 300);
     }, duration);
   }
+
+  function updateSprite(deltaTime) {
+  const sprite = document.querySelector('.player-sprite');
+  if (!sprite) return;
+
+  // Detecta direção
+  if (Math.abs(movementX) > Math.abs(movementY)) {
+    if (movementX > 5) currentDirection = 3; // direita
+    else if (movementX < -5) currentDirection = 2; // esquerda
+  } else {
+    if (movementY > 5) currentDirection = 0; // baixo
+    else if (movementY < -5) currentDirection = 1; // cima
+  }
+
+  // Animação se estiver se movendo
+  if (movementX !== 0 || movementY !== 0) {
+    animationTimer += deltaTime;
+    if (animationTimer > 150) {
+      currentFrame = (currentFrame + 1) % 3;
+      animationTimer = 0;
+    }
+  } else {
+    currentFrame = 1; // Animação idle
+  }
+
+  const x = currentFrame * 32;
+  const y = currentDirection * 32;
+
+  sprite.style.backgroundPosition = `-${x}px -${y}px`;
+}
+
+
+function gameLoop(timestamp) {
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+
+  // Movement
+  if (movementX !== 0 || movementY !== 0) {
+    playerPos[0] += -movementY * movementSpeed;
+    playerPos[1] += movementX * movementSpeed;
+
+    playerMarker.setLatLng(playerPos);
+    map.setView(playerPos);
+  }
+
+  // Sprite animation
+  updateSprite(deltaTime);
+
+  requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
   </script>
 </body>
 </html>
