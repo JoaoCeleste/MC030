@@ -33,28 +33,257 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.8);
+      background: radial-gradient(circle at 50% 10%, rgba(255,255,255,0.03), rgba(0,0,0,0.94) 45%);
       z-index: 3000;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
-      overflow-y: auto;
+      overflow: hidden;
+      padding: 20px;
+    }
+
+    #quizModal::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 20%, rgba(255,255,255,0.0), rgba(0,0,0,0.86) 45%);
+      pointer-events: none;
     }
 
     #quizBox {
-      margin: auto;
-      background: #1c1c1e;
-      color: white;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 600px;
-      padding: 20px;
+      width: 100%;
+      max-width: 980px;
+      background: linear-gradient(160deg, rgba(9,9,14,0.92), rgba(17,12,20,0.95));
+      color: #f9f8f7;
+      border-radius: 24px;
+      border: 3px solid rgba(175, 125, 45, 0.85);
+      box-shadow: 0 0 48px rgba(0,0,0,0.8), 0 24px 50px rgba(0,0,0,0.55);
+      padding: 16px;
       position: relative;
-      box-shadow: 0 0 30px rgba(255,255,255,0.15);
+      overflow: hidden;
+      min-height: 340px;
+      min-width: 340px;
+      margin-bottom: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      backdrop-filter: blur(2px);
     }
+
+    #closeQuiz {
+      z-index: 20;
+    }
+
+    #quizBox::after {
+      content: '';
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 12px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(255,212,90,0.8), rgba(255,255,255,0) 70%);
+      pointer-events: none;
+    }
+
+    #characterScene {
+      display: flex;
+      align-items: flex-end;
+      gap: 14px;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    #characterImg {
+      width: 200px;
+      height: 240px;
+      border-radius: 16px;
+      object-fit: cover;
+      border: 4px solid rgba(255, 199, 10, 0.65);
+      box-shadow: 0 0 30px rgba(255, 198, 60, 0.35), inset 0 0 12px rgba(0,0,0,0.6);
+      background: linear-gradient(160deg, rgba(0,0,0,.6), rgba(0,0,0,.2));
+      transform: translateY(0);
+    }
+
+    #characterInfo {
+      flex: 1;
+      background: rgba(16, 11, 17, 0.80);
+      border: 2px solid rgba(255, 195, 46, 0.35);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 220px;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.5);
+    }
+
+    #characterName {
+      margin: 0;
+      font-size: 1.95rem;
+      letter-spacing: 0.6px;
+      color: #ffcf47;
+      text-shadow: 0 0 28px rgba(255,190,25,0.75);
+    }
+
+    #characterText {
+      margin-top: 8px;
+      line-height: 1.5;
+      font-size: 1.05rem;
+      min-height: 68px;
+      color: #f6f5f4;
+      text-shadow: 0 0 2px rgba(0,0,0,0.33);
+    }
+
+    #dialogBox {
+      background: rgba(8, 8, 12, 0.88);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-top: 8px;
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.4);
+      min-height: 62px;
+    }
+
+    #quizContent {
+      margin-top: 8px;
+      display: none;
+      z-index: 2;
+    }
+
+    #dialogScene {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      min-height: 260px;
+      position: relative;
+      z-index: 2;
+    }
+
+    #characterLeft {
+      width: 240px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    #characterImg {
+      width: 100%;
+      height: auto;
+      max-height: 490px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 4px solid rgba(237, 214, 85, 0.75);
+      box-shadow: 0 0 30px rgba(255,214,80,0.4), inset 0 0 22px rgba(0,0,0,0.6);
+      background: linear-gradient(160deg, rgba(0,0,0,.66), rgba(10,10,10,.2));
+    }
+
+    #balloonGroup {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #nameBalloon {
+      background: rgba(20,20,30,0.92);
+      border: 2px solid rgba(255,210,120,0.5);
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.55);
+    }
+
+    #characterName {
+      margin: 0;
+      font-size: 1.7rem;
+      color: #ffd845;
+      text-shadow: 0 0 14px rgba(255, 216, 86, 0.78);
+      line-height: 1.15;
+    }
+
+    #characterSubtitle {
+      margin: 6px 0 0 0;
+      font-size: 1rem;
+      color: #d6d1c0;
+      opacity: 0.95;
+    }
+
+    #speechBalloon {
+      background: rgba(11,11,18,0.9);
+      border: 2px solid rgba(200, 175, 90, 0.45);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: inset 0 0 22px rgba(0,0,0,0.45), 0 0 22px rgba(10,10,15,0.5);
+      min-height: 215px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #dialogBox {
+      background: rgba(9, 9, 14, 0.95);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+      min-height: 72px;
+    }
+
+    #quizTitle {
+      margin: 0;
+      font-size: 1.35rem;
+      color: #ffc65c;
+      text-shadow: 0 0 8px rgba(255,210,100,0.73);
+    }
+
+    #quizQuestion {
+      margin: 8px 0;
+      line-height: 1.45;
+      min-height: 40px;
+      color: #fff;
+    }
+
     #quizOptions button {
       display: block;
-      margin: 5px 0;
+      margin: 6px 0;
       width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,250,210,0.24);
+      background: rgba(30, 22, 34, 0.85);
+      color: #fff;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, background 0.2s ease, border-color 0.2s ease;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    #quizOptions button:hover {
+      background: rgba(255, 215, 95, 0.2);
+      border-color: rgba(255,250,210,0.95);
+      transform: translateY(-1px);
+    }
+
+    #quizOptions button:active {
+      transform: translateY(1px);
+    }
+
+    #quizOptions button {
+      display: block;
+      margin: 6px 0;
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      padding: 10px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+
+    #quizOptions button:hover {
+      background: rgba(255,255,255,0.16);
+      transform: translateY(-1px);
     }
 
     .toast {
@@ -242,38 +471,43 @@
   style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
   background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
 
-  <div id="quizBox"
-    style="background:#1c1c1e; color:white; border-radius:20px; width:90%;
-    max-width:600px; padding:20px; position:relative; overflow:hidden;">
-
+  <div id="quizBox">
     <button id="closeQuiz"
-      style="position:absolute; top:10px; right:15px; background:none;
-      color:white; border:none; font-size:1.5rem; cursor:pointer;">✖</button>
+      style="position:absolute; top:12px; right:14px; background:rgba(255,255,255,0.08);
+      color:white; border:none; font-size:1.6rem; padding:6px 10px; border-radius:8px; cursor:pointer;">
+      ✖
+    </button>
 
-    <div style="display:flex; flex-direction:row; align-items:flex-start; gap:20px;">
-      <img id="characterImg"
-        src=""
-        alt="Character"
-        style="width:120px; height:120px; border-radius:50%; object-fit:cover;
-        box-shadow:0 0 10px rgba(255,255,255,0.3);">
-      <div style="flex:1;">
-        <h3 id="characterName" style="margin:0; font-size:1.4rem; color:#ffcb05;"></h3>
-        <p id="characterText" style="margin-top:10px; line-height:1.4;"></p>
+    <div id="dialogScene">
+      <div id="characterLeft">
+        <img id="characterImg" src="" alt="Character">
+      </div>
+
+      <div id="balloonGroup">
+        <div id="nameBalloon">
+          <h3 id="characterName"></h3>
+          <p id="characterSubtitle"></p>
+        </div>
+
+        <div id="speechBalloon">
+          <div id="dialogBox">
+            <p id="characterText"></p>
+          </div>
+
+          <div id="quizContent">
+            <h2 id="quizTitle"></h2>
+            <p id="quizQuestion"></p>
+            <div id="quizOptions"></div>
+          </div>
+
+          <button id="nextBtn"
+            style="margin-top:8px; background:#ffcb05; color:#111;
+            border:none; padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:900;">
+            Continuar
+          </button>
+        </div>
       </div>
     </div>
-
-    <div id="quizContent" style="display:none; margin-top:20px;">
-      <h2 id="quizTitle" style="font-size:1.2rem; color:#ffa500;"></h2>
-      <p id="quizQuestion" style="margin:10px 0;"></p>
-      <div id="quizOptions"
-        style="display:flex; flex-direction:column; gap:10px;"></div>
-    </div>
-
-    <button id="nextBtn"
-      style="margin-top:15px; background:#ffcb05; color:black;
-      border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">
-      Continuar
-    </button>
   </div>
 </div>
 
@@ -339,6 +573,7 @@
         medal: "🏅 Medalha de Física",
         character: {
         name: "Albert Einstein",
+        title: "Mestre da Física",
         img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
         intro: [
           "Seja bem vindo ao Instituto de Física Gleb Wataghin (IFGW)! Eu sou Albert Einstein, vou ser seu guia nesta jornada.",
@@ -374,6 +609,7 @@
         medal: "🏅 Medalha de Matemática",
         character: {
           name: "Pitágoras",
+          title: "Guardião da Geometria",
           img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Kapitolinischer_Pythagoras_adjusted.jpg/400px-Kapitolinischer_Pythagoras_adjusted.jpg",
           intro: [
             "Saudações viajante! Eu sou Pitágoras da cidade de Salmos.",
@@ -431,6 +667,7 @@
         medal: "🏅Medalha da Unicamp",
         character:{
           name: "Zeferino Vaz",
+          title: "Patriarca da Unicamp",
           img:"https://upload.wikimedia.org/wikipedia/commons/f/f5/Zeferino_Vaz_%28cropped%29.jpg",
           intro: [
             "Bem vindo ao ultimo desafio. Meu nome é Zeferino Vaz, eu sou responsável pela construção da Unicamp",
@@ -532,15 +769,19 @@
       const closeBtn = document.getElementById("closeQuiz");
       const charImg = document.getElementById("characterImg");
       const charName = document.getElementById("characterName");
+      const charSubtitle = document.getElementById("characterSubtitle");
       const charText = document.getElementById("characterText");
       const quizContent = document.getElementById("quizContent");
+      const dialogBox = document.getElementById("dialogBox");
 
       modal.style.display = "flex";
       quizContent.style.display = "none";
+      dialogBox.style.display = "block";
       nextBtn.style.display = "inline-block";
 
       charImg.src = gym.character.img;
       charName.textContent = gym.character.name;
+      charSubtitle.textContent = gym.character.title || gym.name;
       let index = 0;
       charText.textContent = gym.character.intro[index];
 
@@ -556,7 +797,8 @@
           charText.textContent = gym.character.intro[index];
         } else {
           // Mudar para quiz
-          charText.textContent = "";
+          dialogBox.style.display = "none";
+          quizContent.style.display = "block";
           nextBtn.style.display = "none";
           showQuiz(gym);
         }
