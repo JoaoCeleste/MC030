@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Unicamp Map Game</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; padding: 0; background: #000; }
+    #map { height: 100vh; width: 100vw; }
+    .joystick {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 120px;
+      height: 120px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 50%;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .stick {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      position: relative;
+    }
+    #quizModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 3000;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    #quizBox {
+      margin: auto;
+      background: #1c1c1e;
+      color: white;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(255,255,255,0.15);
+    }
+    #quizOptions button {
+      display: block;
+      margin: 5px 0;
+      width: 100%;
+    }
+
+    .toast {
+      background: #1c1c1e;
+      color: white;
+      border-radius: 15px;
+      padding: 20px 30px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      text-align: center;
+      min-width: 250px;
+      max-width: 400px;
+      animation: slideIn 0.3s ease-out;
+      pointer-events: auto;
+      border-left: 4px solid #ffcb05;
+    }
+
+    .toast.error {
+      border-left-color:#ff4444;
+    }
+
+    .toast.success {
+      border-left-color:#44ff44;
+    }
+
+    .player-sprite {
+      width: 32px;
+      height: 32px;
+      background-image: url('assets/sprite_sheet.png');
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      transform: scale(2);
+      transform-origin: top left;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity:0;
+        transform:translate(-50%, -60%);
+      }
+      to {
+        opacity:1;
+        transform:translate(-50%, -50%);
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        opacity:1;
+        transform:translate(-50%, -50%);
+      }
+      to {
+        opacity:0;
+        transform:translate(-50%, -60%);
+      }
+    }
+
+    .toast.hide {
+      animation:slideOut 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+<!-- RESET POSITION BUTTON -->
+<button id="resetPosition"
+  style="position:fixed; bottom:120px; right:20px; z-index:2500;
+         padding:10px 15px; border-radius:8px; background:#666;
+         color:#fff; border:none;">
+  Resetar Posição
+</button>
+
+<!-- TOGGLE MOVEMENT BUTTON -->
+<button id="toggleMovement"
+  style="position:fixed; bottom:70px; right:20px; z-index:2500;
+         padding:10px 15px; border-radius:8px; background:#007bff;
+         color:#fff; border:none;">
+  Modo: Joystick
+</button>
+
+<!-- RESET MODAL -->
+<div id="resetModal"
+     style="display:none; position:fixed; bottom:20%; left:50%; transform:translate(-50%,0);
+            background:#fff; padding:20px; border-radius:10px; z-index:3000; width:300px;
+            text-align:center;">
+  <p>O progresso das medalhas será resetado e não há opção de desfazer.<br><br>
+     Deseja mesmo continuar?</p>
+  <button id="resetConfirmYes" style="margin:5px;">Sim</button>
+  <button id="resetConfirmNo" style="margin:5px;">Não</button>
+</div>
+
+<!-- RESET BUTTON -->
+<button id="resetButton"
+        style="position:fixed; bottom:20px; right:20px; z-index:2500; padding:10px 15px;
+               border-radius:8px; background:#b00; color:#fff; border:none;">
+  Resetar Medalhas
+</button>
+
+
+
+<div id="titleScreen"
+  style="position:fixed; inset:0; background:url('assets/Unicamp_pixelated.png') center center / cover no-repeat;
+  /* fallback gradient in case image fails */
+  background-color:#002855;
+  display:flex; align-items:flex-start; justify-content:flex-start;
+  color:white; font-family:'Righteous', sans-serif; text-align:left;
+  padding-left:10%; z-index:4000; image-rendering:pixelated;">
+
+  <div id="titleContent" style="max-width:600px; margin-top:5vh;">
+    <h1 id="mainTitle" style="font-size:10em; margin:0; text-shadow:0 0 20px #000; white-space:nowrap; -webkit-text-stroke:2px #000;">Unicamp Explorer</h1>
+    <p id="subtitle" style="margin:10px 0 30px; font-size:2em; line-height:1.2; text-shadow:0 0 10px #000;white-space:nowrap">
+      Explore a Unicamp e teste seus conhecimentos contra figuras históricas
+    </p>
+  </div>
+
+<!-- START BUTTON -->
+<button id="startButton"
+  style="position:fixed; bottom:15vh; left:20vh; z-index:2500; padding:18px 30px;
+         font-size:3em; background:#ffcb05; color:black; border:none; border-radius:12px;
+         cursor:pointer; font-weight:bold; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+  Começar Exploração
+</button>
+</div>
+
+
+
+
+
+  <div id="map"></div>
+  <div id="tutorialOverlay"
+  style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6);
+  color:white; z-index:3000; justify-content:center; align-items:center;
+  flex-direction:column; text-align:center; padding:20px; backdrop-filter:blur(6px);">
+
+  <div style="background:rgba(28,28,30,0.95); border-radius:20px; padding:20px; max-width:500px;">
+    <h2>Como jogar</h2>
+    <p style="font-size:1.1em; line-height:1.5;">
+      Use o JoyStick para andar pelo mapa.<br>
+      Se aproxime de um instituto para desafia-lo, caso consigar vencer o quiz você receberá uma medalha.<br>
+      Não deixe de explorar os pontos de interesse e prestar atenção no ambiente a sua volta.
+    </p>
+    <button id="closeTutorial"
+      style="margin-top:15px; background:#ffcb05; color:black; border:none;
+      padding:10px 25px; border-radius:10px; font-size:1em; cursor:pointer;">
+      Entendi!
+    </button>
+  </div>
+</div>
+
+<div id="legend"
+  style="position:fixed; top:20px; left:20px; background:rgba(28,28,30,0.85);
+  color:white; border-radius:12px; padding:12px 16px; z-index:1500;
+  font-size:0.9em; line-height:1.5; max-width:220px; box-shadow:0 0 10px rgba(0,0,0,0.3);">
+
+  <h4 style="margin:0 0 8px 0; font-size:1em; color:#ffcb05; text-align:center;">
+    Legenda
+  </h4>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <img src="assets/Gym.png" width="64" height="64" alt="Gym">
+    <span>Institutos</span>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <img src="assets/POI.png" width="64" height="64" alt="POI">
+    <span>Pontos de Interesse</span>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <img src='assets/Player.png' width="64" height="64" alt="Plyer">
+    <span>Jogador</span>
+  </div>
+
+</div>
+
+  <div class="joystick" id="joystick">
+    <div class="stick" id="stick"></div>
+  </div>
+  <div id="medals" style="position:fixed; top:20px; right:20px; 
+  background:rgba(255,255,255,0.8); padding:10px; border-radius:12px; 
+  z-index:1500; display:flex; flex-wrap:wrap; gap:5px; max-width:150px;">
+    <h4 style="margin:0 0 5px 0; width:100%;">Medalhas</h4>
+  </div>
+
+
+<div id="quizModal"
+  style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center;">
+
+  <div id="quizBox"
+    style="background:#1c1c1e; color:white; border-radius:20px; width:90%;
+    max-width:600px; padding:20px; position:relative; overflow:hidden;">
+
+    <button id="closeQuiz"
+      style="position:absolute; top:10px; right:15px; background:none;
+      color:white; border:none; font-size:1.5rem; cursor:pointer;">✖</button>
+
+    <div style="display:flex; flex-direction:row; align-items:flex-start; gap:20px;">
+      <img id="characterImg"
+        src=""
+        alt="Character"
+        style="width:120px; height:120px; border-radius:50%; object-fit:cover;
+        box-shadow:0 0 10px rgba(255,255,255,0.3);">
+      <div style="flex:1;">
+        <h3 id="characterName" style="margin:0; font-size:1.4rem; color:#ffcb05;"></h3>
+        <p id="characterText" style="margin-top:10px; line-height:1.4;"></p>
+      </div>
+    </div>
+
+    <div id="quizContent" style="display:none; margin-top:20px;">
+      <h2 id="quizTitle" style="font-size:1.2rem; color:#ffa500;"></h2>
+      <p id="quizQuestion" style="margin:10px 0;"></p>
+      <div id="quizOptions"
+        style="display:flex; flex-direction:column; gap:10px;"></div>
+    </div>
+
+    <button id="nextBtn"
+      style="margin-top:15px; background:#ffcb05; color:black;
+      border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">
+      Continuar
+    </button>
+  </div>
+</div>
+
+<div id="poiModal" style="display:none; position:fixed; inset:0;
+ background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:3000;
+ justify-content:center; align-items:center;">
+  <div id="poiBox" style="background:rgba(28,28,30,0.95); color:white;
+   border-radius:20px; padding:20px; max-width:600px; width:90%;
+   display:flex; flex-direction:column; align-items:center; text-align:center;">
+    <img id="poiImg" src="" alt="POI" style="width:100%; border-radius:12px; margin-bottom:15px; max-height:250px; object-fit:cover;">
+    <h2 id="poiTitle"></h2>
+    <p id="poiText" style="font-size:1.1em; line-height:1.4;"></p>
+    <button id="closePoiBtn" style="margin-top:15px;">Fechar</button>
+  </div>
+</div>
+
+<div id="toastContainer" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+  z-index:4000; pointer-events:none;">
+</div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Inicializar mapa Leaflet
+    const map = L.map('map', {
+      zoomControl: false,
+      attributionControl: false
+    }).setView([-22.817, -47.068], 17);
+
+    // Camada de mapa
+    L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: ''
+    }).addTo(map);
+
+    // Posição inicial do jogador (declarada antes de usar em playerMarker)
+    let playerPos = [-22.817, -47.068];
+
+    // Raio de acesso para interagir com gyms e POIs (em metros)
+    const ACCESS_RADIUS = 50;
+
+    const playerMarker = L.marker(playerPos, {
+      icon: L.divIcon({
+        className: 'player-container',
+        html: '<div class="player-sprite"></div>',
+        iconSize: [32,32],
+      })
+    }).addTo(map)
+
+
+
+    // Ícone vermelho para institutos
+    const gymIcon = new L.Icon({
+      iconUrl: 'assets/Gym.png',
+      iconSize: [48, 48],
+      
+    });
+
+    // Lista de institutos com quizzes 
+    const gyms = [
+      {
+        name: "IFGW - Instituto de Física",
+        coords: [-22.817519201512976, -47.067349571393784],
+        medal: "🏅 Medalha de Física",
+        character: {
+        name: "Albert Einstein",
+        img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
+        intro: [
+          "Seja bem vindo ao Instituto de Física Gleb Wataghin (IFGW)! Eu sou Albert Einstein, vou ser seu guia nesta jornada.",
+          "A física nos ajuda a entender como o universo funciona, das coisas mais pequenas como átomos até gigantescas como galáxias.",
+          "O IFGW foi fundado em 1966 com o intuito de disseminar e explorar essa área do conhecimento.",
+          "Você sabia que,dentre outros avanços, em 1972 aqui no Instituto foram produzidos os primeiros cristais semi condutores da América Latina?",
+          "Mas agora vamos colocar a prova o que você sabe."
+        ]
+      },
+        quiz: [
+          {
+            q: "Consegue me dizer qual é velocidade da luz no vácuo?",
+            options: ["3 x 10^8 m/s", "1.5 x 10^7 m/s", "9.8 m/s^2"],
+            answer: 0
+          },
+          {
+            q: "Qual das leis que eu propus descreve que toda ação exige uma reação?",
+            options: ["Primeira", "Segunda", "Terceira"],
+            answer: 2
+          },
+          {
+            q: "Na parte de tráz do IFGW em um corredor podemos encontrar a direita os quatro diferentes departamentos, tomando o sentido CB -> IFGW qual o departamento de Fisica Aplicada se encontra em qual porta?",
+            options: ["Primeira", "Segunda", "Terceira", "Quarta"],
+            answer: 3
+          }
+        ]
+      },
+      
+      
+      {
+        name: "IMECC - Instituto de Matemática, Estatística Computação Científica",
+        coords: [-22.81577381481928, -47.067741816556705],
+        medal: "🏅 Medalha de Matemática",
+        character: {
+          name: "Pitágoras",
+          img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Kapitolinischer_Pythagoras_adjusted.jpg/400px-Kapitolinischer_Pythagoras_adjusted.jpg",
+          intro: [
+            "Saudações viajante! Eu sou Pitágoras da cidade de Salmos.",
+            "Bem vindo ao Instituto de Matemática, Estatística Computação Científica (IMECC), onde exploramos o fantástico mundo dos números.",
+            "A matemática está presente em quase tudo que podemos presenciar, de uma pequena compra no supermecado até aos cálculos que nos permitiram pisar na lua.",
+            "Desde 1968 o IMECC vem ensinando e formando não apenas matématicos, como também a base de conhecimento que muitas outras áreas da ciência precisam para serem exercidas",
+            "Vamos ver o quão familiar você é com tudo isso."
+          ]
+        },
+        quiz: [
+          {
+            q: "Sabe me dizer o que o teorema que eu formulei diz?",
+            options: [
+              "a² + b² = c²",
+              "E = mc²",
+              "F = ma"
+            ],
+            answer: 0
+          },
+          {
+            q: "Dentro do IMECC, na parte dos fundos você vai encontrar escadas que se assemlham muito a uma forma gomética, sabe dizer qual é ela?",
+            options: [
+              "Triângulo",
+              "Helicóide",
+              "Círculo"
+            ],
+            answer: 1
+          },
+          {
+            q: "Também dentro do IMECC temos um anfiteatro com um formato bem caracteristico, ele é:",
+            options: [
+              "Esferico",
+              "Quadrado",
+              "Círcular"
+            ],
+            answer: 2
+          },
+          {
+            q: "Sabe dizer qual a formula que descreve a forma da última pergunta considerando um eixe cartesiano e com centro em (0,0)?",
+            options: [
+              "X^2 + Y^2 = R^2",
+              "X^2 + Y^2 + Z^2 = R^2",
+              "X^2/A^2 + Y^2/B^2 = 1"
+            ],
+            answer: 0
+          },
+        ],
+
+      },
+
+
+      {
+        name: "Unicamp",
+        coords: [-22.817084, -47.069732],
+        medal: "🏅Medalha da Unicamp",
+        character:{
+          name: "Zeferino Vaz",
+          img:"https://upload.wikimedia.org/wikipedia/commons/f/f5/Zeferino_Vaz_%28cropped%29.jpg",
+          intro: [
+            "Bem vindo ao ultimo desafio. Meu nome é Zeferino Vaz, eu sou responsável pela construção da Unicamp",
+            "Vejo que você provou ter conhecimentos das mais diversas áreas para chegar aqui, e ainda por cima é um bom observador",
+            "É importante entender como as coisas funcionam, mas não podemos deixar de focar no que está a nossa volta.",
+            "Vamos ver se você tem prestado atenção na minha criação como um todo"
+          ]
+        },
+        quiz: [
+          {
+            q: "O Ciclo Básico segue uma organização bem simples quanto ao número das salas, qual dessas é a correta",
+            options: [
+              "Um dos lados contém salas de números pares e outro de número impar",
+              "As salas menores contém numeração menor e as salas maiores contém numeração maior ",
+              "As salas menores e maiores tem numeração independentes umas das outras"
+            ],
+            answer: 0
+          }
+        ],
+        locked: true
+      }
+
+    ];
+  // Ícone laranja para pontos de interesse
+  const poiIcon = L.icon({
+    iconUrl: 'assets/POI.png',
+    iconSize: [48,48],
+    
+  });
+
+  // Pontos de interesse no campus
+  const pointsOfInterest = [
+  {
+    name: "Ciclo Básico I (CB)",
+    coords: [-22.817533 , -47.068635],
+    img: "https://www.basico.unicamp.br/wp-content/uploads/2022/05/cropped-Ciclo_Basico_UNICAMP_2015-e1653046999846.jpg",
+    text: "Inaugurado em 1972, o Ciclo Básico 1 é um conjunto de salas de uso multidisciplinar que é um ponto de convergência de alunos e professores de diversos cursos. Criando assim um ambiente heterogênio de ensino que permite com que os alunos não só aprofundem seus conhecimentos acadêmicos, como também estabeleçam laços profundos com seus colegas."
+  },
+  {
+    name: "Restaurante Universitário (RU)",
+    coords: [-22.817472, -47.071710],
+    img: "https://unicamp.br/unicamp/sites/default/files/2020-03/com_bandejao_20200323.jpg",
+    text: "Fundado em 1976, o Restaurante Universitário , que acabou ficando conhecido popularmente como Bandejão, se tornou uma parte vital da vida no campus. Promovendo uma alimentação acessível dentro do campus permite com que os alunos foquem seus esforços integralmente nos estudos"
+  }
+];
+
+
+    
+
+    // Adicionar marcadores dos institutos ao mapa
+    gyms.forEach(gym => {
+    // Pular institutos bloqueados (desafio final)
+    if (gym.locked) return;
+
+    const marker = L.marker(gym.coords, { icon: gymIcon })
+      .addTo(map)
+      .bindTooltip(gym.name);
+
+    marker.on('click', () => {
+      const dist = getDistanceMeters(
+        playerPos[0],
+        playerPos[1],
+        gym.coords[0],
+        gym.coords[1]
+      );
+
+      if (dist <= ACCESS_RADIUS) {
+        openQuiz(gym);
+      } else {
+        toast(`Você está longe demais de ${gym.name}! Se aproxime mais.`, 'error');
+      }
+    });
+  });
+
+
+  // Adicionar marcadores dos pontos de interesse ao mapa
+  pointsOfInterest.forEach(poi => {
+    const marker = L.marker(poi.coords, { icon: poiIcon }).addTo(map);
+    marker.on('click', () => {
+      const dist = getDistanceMeters(
+        playerPos[0], playerPos[1],
+        poi.coords[0], poi.coords[1]
+      );
+      if (dist <= ACCESS_RADIUS) {
+        openPOI(poi);
+      } else {
+        toast(`Você está longe demais de ${poi.name}! Se aproxime mais.`, 'error');
+      }
+    });
+  });
+
+
+
+    // Lógica para abrir quiz de um instituto
+    function openQuiz(gym) {
+      const modal = document.getElementById("quizModal");
+      const box = document.getElementById("quizBox");
+      const nextBtn = document.getElementById("nextBtn");
+      const closeBtn = document.getElementById("closeQuiz");
+      const charImg = document.getElementById("characterImg");
+      const charName = document.getElementById("characterName");
+      const charText = document.getElementById("characterText");
+      const quizContent = document.getElementById("quizContent");
+
+      modal.style.display = "flex";
+      quizContent.style.display = "none";
+      nextBtn.style.display = "inline-block";
+
+      charImg.src = gym.character.img;
+      charName.textContent = gym.character.name;
+      let index = 0;
+      charText.textContent = gym.character.intro[index];
+
+      // Fechar quiz
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+
+      // Próximo diálogo → depois quiz
+      nextBtn.onclick = () => {
+        index++;
+        if (index < gym.character.intro.length) {
+          charText.textContent = gym.character.intro[index];
+        } else {
+          // Mudar para quiz
+          charText.textContent = "";
+          nextBtn.style.display = "none";
+          showQuiz(gym);
+        }
+      };
+    }
+
+    // Exibir quiz ao jogador
+    function showQuiz(gym) {
+      const quizContent = document.getElementById("quizContent");
+      const quizTitle = document.getElementById("quizTitle");
+      const quizQuestion = document.getElementById("quizQuestion");
+      const optionsDiv = document.getElementById("quizOptions");
+      const nextBtn = document.getElementById("nextBtn");
+
+      let currentQ = 0;  // Questão atual
+      const totalQ = gym.quiz.length;
+
+      // Carregar próxima questão
+      function loadQuestion() {
+        const q = gym.quiz[currentQ];
+        quizTitle.textContent = gym.name + ` (${currentQ + 1}/${totalQ})`;
+        quizQuestion.textContent = q.q;
+        optionsDiv.innerHTML = "";
+
+        q.options.forEach((opt, i) => {
+          const btn = document.createElement("button");
+          btn.textContent = opt;
+          btn.onclick = () => {
+            if (i === q.answer) {
+              toast("✅ Resposta correta!", 'success');
+              currentQ++;
+              if (currentQ < totalQ) {
+                loadQuestion();
+              } else {
+                toast("🏅 Você conquistou " + gym.medal + "!", 'success');
+                awardMedal(gym.medal);
+                document.getElementById("quizModal").style.display = "none";
+              }
+            } else {
+              toast("❌ Resposta errada. Tente novamente!", 'error');
+            }
+          };
+          optionsDiv.appendChild(btn);
+        });
+      }
+
+      quizContent.style.display = "block";
+      loadQuestion();
+    }
+
+
+
+    function closeQuiz() {
+      document.getElementById("quizModal").style.display = "none";
+    }
+
+    // Abrir modal de ponto de interesse
+    function openPOI(poi) {
+      const modal = document.getElementById("poiModal");
+      document.getElementById("poiImg").src = poi.img;
+      document.getElementById("poiTitle").textContent = poi.name;
+      document.getElementById("poiText").textContent = poi.text;
+      modal.style.display = "flex";
+    }
+
+    document.getElementById("closePoiBtn").onclick = () => {
+      document.getElementById("poiModal").style.display = "none";
+    };
+
+
+    // Configurar joystick para movimento
+    const joystick = document.getElementById('joystick');
+    const stick = document.getElementById('stick');
+    let centerX, centerY, movementX = 0, movementY = 0;
+    let currentDirection = 0, currentFrame = 1, animationTimer = 0;
+    let lastTime = 0;
+    const movementSpeed = 0.0000001; // velocidade de movimento
+
+    // Lógica de tela inicial e tutorial
+    const titleScreen = document.getElementById("titleScreen");
+    const tutorialOverlay = document.getElementById("tutorialOverlay");
+    const startButton = document.getElementById("startButton");
+    const closeTutorial = document.getElementById("closeTutorial");
+
+    
+    startButton.onclick = () => {
+      titleScreen.style.display = "none";
+      tutorialOverlay.style.display = "flex";
+    };
+
+    
+    closeTutorial.onclick = () => {
+      tutorialOverlay.style.display = "none";
+    };
+
+    
+ 
+
+    // Iniciar entrada de movimento (joystick)
+    function startInput(clientX, clientY) {
+      const rect = joystick.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+      moveInput(clientX, clientY);
+    }
+
+    // Atualizar movimento do joystick
+    function moveInput(clientX, clientY) {
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+      const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40);
+      const angle = Math.atan2(dy, dx);
+      const offsetX = dist * Math.cos(angle);
+      const offsetY = dist * Math.sin(angle);
+      stick.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+      movementX = offsetX;
+      movementY = offsetY;
+    }
+
+    // Parar movimento
+    function endInput() {
+      stick.style.transform = 'translate(0,0)';
+      movementX = 0;
+      movementY = 0;
+    }
+
+
+  
+
+    // Salvar cookie com dados do jogo
+    function setCookie(name, value, days) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = "expires=" + d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
+    }
+
+    // Recuperar valor do cookie
+    function getCookie(name) {
+      const cname = name + "=";
+      const decoded = decodeURIComponent(document.cookie);
+      const parts = decoded.split(';');
+      for (let c of parts) {
+        c = c.trim();
+        if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
+      }
+      return "";
+}
+
+
+
+    // Carregar medalhas salvas do cookie
+    let earnedMedals = getCookie("medals")
+      ? getCookie("medals").split(",")
+      : [];
+
+    // Conceder medalha ao jogador
+    function awardMedal(medal) {
+      if (!earnedMedals.includes(medal)) {
+        earnedMedals.push(medal);
+        updateMedalsDisplay();
+        checkFinalGymUnlock();
+        setCookie("medals", earnedMedals.join(","), 365);
+
+      }
+    }
+
+    // Atualizar exibição de medalhas na interface
+    function updateMedalsDisplay() {
+      const container = document.getElementById("medals");
+      container.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medalhas</h4>";
+      earnedMedals.forEach(medal => {
+        const span = document.createElement("span");
+        span.textContent = medal;
+        container.appendChild(span);
+      });
+    }
+
+    // Desbloquear desafio final quando coletar todas as medalhas
+    function checkFinalGymUnlock() {
+      const normalGyms = gyms.filter(g => !g.locked);
+      const finalGym = gyms.find(g => g.locked);
+
+      if (earnedMedals.length >= normalGyms.length && finalGym) {
+        finalGym.locked = false;
+        const marker = L.marker(finalGym.coords, { icon: gymIcon })
+          .addTo(map)
+          .bindTooltip(finalGym.name);
+        marker.on('click', () => openQuiz(finalGym));
+        toast("🎉 Um novo desafio surgiu no centro da Unicamp!", 'success');
+      }
+    }
+
+      // Carregar medalhas do cookie
+    const savedMedals = getCookie("medals");
+    if(savedMedals) earnedMedals = savedMedals.split(',');
+
+    // Atualiza HUD imediatamente se a função existir
+    if (typeof updateMedalsDisplay === 'function') updateMedalsDisplay();
+
+    // Verifica se o ginásio final deve aparecer ao iniciar
+    if (typeof checkFinalGymUnlock === 'function') checkFinalGymUnlock();
+
+    // Calcular distância em metros entre dois pontos de coordenadas
+    function getDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Raio da Terra em metros
+      const toRad = x => (x * Math.PI) / 180;
+      const φ1 = toRad(lat1);
+      const φ2 = toRad(lat2);
+      const Δφ = toRad(lat2 - lat1);
+      const Δλ = toRad(lon2 - lon1);
+      const a =
+        Math.sin(Δφ / 2) ** 2 +
+        Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+
+
+    // Eventos de joystick (toque e mouse)
+    joystick.addEventListener('touchstart', e => startInput(e.touches[0].clientX, e.touches[0].clientY));
+    joystick.addEventListener('touchmove', e => { e.preventDefault(); moveInput(e.touches[0].clientX, e.touches[0].clientY); });
+    joystick.addEventListener('touchend', endInput);
+
+    joystick.addEventListener('mousedown', e => { e.preventDefault(); startInput(e.clientX, e.clientY); document.addEventListener('mousemove', mouseMove); document.addEventListener('mouseup', mouseUp); });
+
+    function mouseMove(e) { moveInput(e.clientX, e.clientY); }
+    function mouseUp() { endInput(); document.removeEventListener('mousemove', mouseMove); document.removeEventListener('mouseup', mouseUp); }
+
+
+
+
+    // ==== LÓGICA DE RESET DE MEDALHAS ====
+  document.getElementById("resetButton").onclick = () => {
+    document.getElementById("resetModal").style.display = "block";
+  };
+
+  document.getElementById("resetConfirmNo").onclick = () => {
+    document.getElementById("resetModal").style.display = "none";
+  };
+
+  document.getElementById("resetConfirmYes").onclick = () => {
+    earnedMedals = [];
+    setCookie("medals", "", -1); // limpa cookie
+    updateMedalsDisplay();
+    checkFinalGymUnlock();
+    document.getElementById("resetModal").style.display = "none";
+    toast("Progresso resetado!");
+  };
+
+    // ==== ALTERNAR ENTRE JOYSTICK E GPS ====
+  let useJoystick = true;  // Modo joystick ativo por padrão
+  let geoWatchId = null;   // ID do rastreamento GPS
+
+  document.getElementById("toggleMovement").onclick = () => {
+    useJoystick = !useJoystick;
+
+    const btn = document.getElementById("toggleMovement");
+    btn.textContent = useJoystick ? "Modo: Joystick" : "Modo: GPS";
+
+    // Mostrar ou esconder o joystick visualmente
+    document.getElementById("joystick").style.display = useJoystick ? "flex" : "none";
+
+    if (!useJoystick) {
+      // Iniciar rastreamento de localização
+      if (navigator.geolocation) {
+        geoWatchId = navigator.geolocation.watchPosition(
+          pos => {
+            playerPos = [pos.coords.latitude, pos.coords.longitude];
+            playerMarker.setLatLng(playerPos);
+            map.setView(playerPos);
+          },
+          err => toast("Erro ao acessar localização: " + err.message, 'error'),
+          { enableHighAccuracy: true, maximumAge: 1000 }
+        );
+      } else {
+        toast("Geolocalização não suportada neste dispositivo.", 'error');
+        useJoystick = true;
+        btn.textContent = "Modo: Joystick";
+        document.getElementById("joystick").style.display = "flex";
+      }
+    } else {
+      // Parar rastreamento GPS
+      if (geoWatchId) {
+        navigator.geolocation.clearWatch(geoWatchId);
+        geoWatchId = null;
+      }
+    }
+  };
+
+    // ==== LÓGICA DO BOTÃO DE RESET DE POSIÇÃO ====
+  const resetPosButton = document.getElementById("resetPosition");
+
+  // Coordenada inicial do jogador
+  const initialPosition = [-22.817, -47.068];
+
+  // Reset de posição - apenas em modo joystick
+  resetPosButton.onclick = () => {
+    if (!useJoystick) return;  // Funciona apenas no modo joystick
+    playerPos = [...initialPosition];
+    playerMarker.setLatLng(playerPos);
+    map.setView(playerPos);
+    toast("Posição resetada para o ponto inicial.");
+  };
+
+  // Atualizar visual do botão conforme o modo
+  function updateResetButtonState() {
+    if (useJoystick) {
+      resetPosButton.style.background = "#007bff";
+      resetPosButton.disabled = false;
+    } else {
+      resetPosButton.style.background = "#666";
+      resetPosButton.disabled = true;
+    }
+  }
+
+  // Atualizar estado quando modo muda
+  const _oldToggle = document.getElementById("toggleMovement").onclick;
+  document.getElementById("toggleMovement").onclick = () => {
+    _oldToggle();
+    updateResetButtonState();
+  };
+
+  // Inicializar estado correto
+  updateResetButtonState();
+
+  // Mostrar notificação temporária na tela
+  function toast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toastContainer');
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast ${type}`;
+    toastEl.textContent = message;
+    
+    container.appendChild(toastEl);
+    
+    setTimeout(() => {
+      toastEl.classList.add('hide');
+      setTimeout(() => toastEl.remove(), 300);
+    }, duration);
+  }
+
+  function updateSprite(deltaTime) {
+  const sprite = document.querySelector('.player-sprite');
+  if (!sprite) return;
+
+  // Detecta direção
+  if (Math.abs(movementX) > Math.abs(movementY)) {
+    if (movementX > 5) currentDirection = 3; // direita
+    else if (movementX < -5) currentDirection = 2; // esquerda
+  } else {
+    if (movementY > 5) currentDirection = 0; // baixo
+    else if (movementY < -5) currentDirection = 1; // cima
+  }
+
+  // Animação se estiver se movendo
+  if (movementX !== 0 || movementY !== 0) {
+    animationTimer += deltaTime;
+    if (animationTimer > 150) {
+      currentFrame = (currentFrame + 1) % 3;
+      animationTimer = 0;
+    }
+  } else {
+    currentFrame = 1; // Animação idle
+  }
+
+  const x = currentFrame * 32;
+  const y = currentDirection * 32;
+
+  sprite.style.backgroundPosition = `-${x}px -${y}px`;
+}
+
+
+function gameLoop(timestamp) {
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+
+  // Movement
+  if (movementX !== 0 || movementY !== 0) {
+    playerPos[0] += -movementY * movementSpeed;
+    playerPos[1] += movementX * movementSpeed;
+
+    playerMarker.setLatLng(playerPos);
+    map.setView(playerPos);
+  }
+
+  // Sprite animation
+  updateSprite(deltaTime);
+
+  requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
+  </script>
+</body>
+</html>
