@@ -893,12 +893,15 @@
       
     });
 
+    // Marker dedicado do ginásio final (controle de exibição/removal)
+    let finalGymMarker = null;
+
     // Lista de institutos com quizzes 
     const gyms = [
       {
         name: "IFGW - Instituto de Física",
         coords: [-22.817519201512976, -47.067349571393784],
-        medal: "🏅 Medalha de Física",
+        medal: "Medalha de Física",
         character: {
         name: "Albert Einstein",
         title: "Mestre da Física",
@@ -934,7 +937,7 @@
       {
         name: "IMECC - Instituto de Matemática, Estatística Computação Científica",
         coords: [-22.81577381481928, -47.067741816556705],
-        medal: "🏅 Medalha de Matemática",
+        medal: "Medalha de Matemática",
         character: {
           name: "Pitágoras",
           title: "Guardião da Geometria",
@@ -992,7 +995,7 @@
       {
         name: "Unicamp",
         coords: [-22.817084, -47.069732],
-        medal: "🏅Medalha da Unicamp",
+        medal: "Medalha da Unicamp",
         character:{
           name: "Zeferino Vaz",
           title: "Patriarca da Unicamp",
@@ -1161,7 +1164,7 @@
               if (currentQ < totalQ) {
                 loadQuestion();
               } else {
-                toast("🏅 Você conquistou " + gym.medal + "!", 'success');
+                toast("Você conquistou " + gym.medal + "!", 'success');
                 awardMedal(gym.medal);
                 document.getElementById("quizModal").style.display = "none";
               }
@@ -1299,24 +1302,59 @@
       const container = document.getElementById("medals");
       container.innerHTML = "<h4 style='margin:0 0 5px 0; width:100%;'>Medalhas</h4>";
       earnedMedals.forEach(medal => {
-        const span = document.createElement("span");
-        span.textContent = medal;
-        container.appendChild(span);
+        const medalName = medal.replace(/🏅\s*/, "");
+
+        const medalItem = document.createElement("div");
+        medalItem.style.display = "flex";
+        medalItem.style.alignItems = "center";
+        medalItem.style.gap = "6px";
+        medalItem.style.marginBottom = "4px";
+
+        const img = document.createElement("img");
+        img.src = "assets/Medal.png";
+        img.alt = "Medalha";
+        img.style.width = "22px";
+        img.style.height = "22px";
+        img.style.objectFit = "contain";
+
+        const text = document.createElement("span");
+        text.textContent = medalName;
+        text.style.fontSize = "0.8em";
+        text.style.fontWeight = "600";
+
+        medalItem.appendChild(img);
+        medalItem.appendChild(text);
+        container.appendChild(medalItem);
       });
     }
 
-    // Desbloquear desafio final quando coletar todas as medalhas
+    // Desbloquear/desaparecer desafio final conforme progresso de medalhas
     function checkFinalGymUnlock() {
-      const normalGyms = gyms.filter(g => !g.locked);
-      const finalGym = gyms.find(g => g.locked);
+      const finalGym = gyms.find(g => g.name === "Unicamp");
+      if (!finalGym) return;
 
-      if (earnedMedals.length >= normalGyms.length && finalGym) {
-        finalGym.locked = false;
-        const marker = L.marker(finalGym.coords, { icon: gymIcon })
-          .addTo(map)
-          .bindTooltip(finalGym.name);
-        marker.on('click', () => openQuiz(finalGym));
-        toast("🎉 Um novo desafio surgiu no centro da Unicamp!", 'success');
+      const unlockedNonFinalGyms = gyms.filter(g => g !== finalGym && !g.locked);
+      const hasAllMedals = earnedMedals.length >= unlockedNonFinalGyms.length;
+
+      if (hasAllMedals) {
+        if (finalGym.locked) {
+          finalGym.locked = false;
+          toast("🎉 Um novo desafio surgiu no centro da Unicamp!", 'success');
+        }
+
+        if (!finalGymMarker) {
+          finalGymMarker = L.marker(finalGym.coords, { icon: gymIcon })
+            .addTo(map)
+            .bindTooltip(finalGym.name);
+          finalGymMarker.on('click', () => openQuiz(finalGym));
+        }
+      } else {
+        finalGym.locked = true;
+
+        if (finalGymMarker) {
+          map.removeLayer(finalGymMarker);
+          finalGymMarker = null;
+        }
       }
     }
 
