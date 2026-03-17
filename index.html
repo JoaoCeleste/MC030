@@ -850,7 +850,7 @@
     const map = L.map('map', {
       zoomControl: false,
       attributionControl: false,
-      minZoom: 16
+      minZoom: 17
     }).setView([-22.817, -47.068], 17);
 
     // Camada de mapa
@@ -869,29 +869,6 @@
       bounds: campusBounds
     }).addTo(map);
 
-    // Contorno do campus (moldura) usando os limites definidos
-    // Adiciona um pequeno padding para cobrir os tiles que ultrapassam ligeiramente os bounds
-    const sw = campusBounds.getSouthWest();
-    const ne = campusBounds.getNorthEast();
-    const nw = campusBounds.getNorthWest();
-    const se = campusBounds.getSouthEast();
-    const padSW = L.latLng(sw.lat, sw.lng);
-    const padNE = L.latLng(ne.lat+ 0.0020, ne.lng);
-    const padNW = L.latLng(ne.lat+ 0.0020, sw.lng);
-    const padSE = L.latLng(sw.lat, ne.lng);
-
-    L.polygon([
-      padNW,
-      padNE,
-      padSE,
-      padSW
-    ], {
-      color: '#ffcd3c',
-      weight: 4,
-      opacity: 0.95,
-      dashArray: '10,6',
-      fill: false
-    }).addTo(map);
 
     // Posição inicial do jogador (declarada antes de usar em playerMarker)
     let playerPos = [-22.817, -47.068];
