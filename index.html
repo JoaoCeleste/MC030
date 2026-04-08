@@ -683,6 +683,10 @@
     </p>
   </div>
 
+<audio id="menuAudio" controls loop style="position: fixed; bottom: 10px; right: 10px; z-index: 2400; width: 200px;">
+  <source src="sounds/menu.mp3" type="audio/mpeg">
+</audio>
+
 <!-- START BUTTON -->
 <button id="startButton"
   style="position:fixed; bottom:15vh; left:20vh; z-index:2500; padding:18px 30px;
@@ -690,8 +694,17 @@
          cursor:pointer; font-weight:bold; box-shadow:0 0 20px rgba(0,0,0,0.5);">
   Começar Exploração
 </button>
+
+<!-- HIDDEN AUDIO FOR START BUTTON -->
+<audio id="startButtonSound">
+  <source src="sounds/start_button.mp3" type="audio/mpeg">
+</audio>
 </div>
 
+<audio id="ButtonClick">
+  <source src="sounds/button_click.mp3" type="audio/mpeg">
+</audio>
+</div>
 
 
 
@@ -932,6 +945,40 @@
           }
         ]
       },
+
+      {
+        name: "IC - Instituto de Computação",
+        coords: [-22.814839398841013, -47.064748367386535],
+        medal: "Medalha de Computação",
+        character: {
+        name: "Alan Turing",
+        title: "O Pai da Computação",
+        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Alan_Turing_%281951%29.jpg/500px-Alan_Turing_%281951%29.jpg",
+        intro: [
+          "Seja bem vindo ao IC.",
+          "Você sabia que apesar do Instituto ser criado em 1996, a computação já era presente na Unicamp desde 1969 com o curso de Bacharelado em Ciência da Computação que era oferecido pelo IMECC.",
+          "Este que foi o primeiro do seu gênero em todo o Brasil."
+
+        ]
+      },
+        quiz: [
+          {
+            q: "Consegue me dizer qual é velocidade da luz no vácuo?",
+            options: ["3 x 10^8 m/s", "1.5 x 10^7 m/s", "9.8 m/s^2"],
+            answer: 0
+          },
+          {
+            q: "Qual das leis que eu propus descreve que toda ação exige uma reação?",
+            options: ["Primeira", "Segunda", "Terceira"],
+            answer: 2
+          },
+          {
+            q: "Na parte de tráz do IFGW em um corredor podemos encontrar a direita os quatro diferentes departamentos, tomando o sentido CB -> IFGW qual o departamento de Fisica Aplicada se encontra em qual porta?",
+            options: ["Primeira", "Segunda", "Terceira", "Quarta"],
+            answer: 3
+          }
+        ]
+      },
       
       
       {
@@ -1066,6 +1113,8 @@
       );
 
       if (dist <= ACCESS_RADIUS) {
+        ButtonClick.currentTime = 0.45;
+        ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         openQuiz(gym);
       } else {
         toast(`Você está longe demais de ${gym.name}! Se aproxime mais.`, 'error');
@@ -1083,6 +1132,8 @@
         poi.coords[0], poi.coords[1]
       );
       if (dist <= ACCESS_RADIUS) {
+        ButtonClick.currentTime = 0.45;
+        ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         openPOI(poi);
       } else {
         toast(`Você está longe demais de ${poi.name}! Se aproxime mais.`, 'error');
@@ -1218,15 +1269,32 @@
     const tutorialOverlay = document.getElementById("tutorialOverlay");
     const startButton = document.getElementById("startButton");
     const closeTutorial = document.getElementById("closeTutorial");
+    const menuAudio = document.getElementById("menuAudio");
+    const startButtonSound = document.getElementById("startButtonSound");
+
+    // Iniciar reprodução do áudio do menu quando a página carrega
+    window.addEventListener('load', () => {
+      menuAudio.play().catch(err => console.log('Áudio não pode ser reproduzido automaticamente:', err));
+    });
 
     
     startButton.onclick = () => {
+      // Pausar e parar o áudio do menu
+      menuAudio.pause();
+      menuAudio.currentTime = 0;
+      
+      // Tocar o som do botão start
+      startButtonSound.currentTime = 0;
+      startButtonSound.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
+      
       titleScreen.style.display = "none";
       tutorialOverlay.style.display = "flex";
     };
 
     
     closeTutorial.onclick = () => {
+      ButtonClick.currentTime = 0.45;
+      ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
       tutorialOverlay.style.display = "none";
     };
 
