@@ -683,9 +683,19 @@
     </p>
   </div>
 
-<audio id="menuAudio" controls loop style="position: fixed; bottom: 10px; right: 10px; z-index: 2400; width: 200px;">
+<audio id="menuAudio" controls loop style="position: fixed; bottom: 10px; right: 40px; z-index: 2400; width: 300px;">
   <source src="sounds/menu.mp3" type="audio/mpeg">
 </audio>
+
+<!-- MUSIC CONTROLS -->
+<div id="musicControls" style="position: fixed; bottom: 70px; right: 40px; z-index: 2400; display: flex; gap: 10px;">
+  <button id="playMusicBtn" style="background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: none;">
+    🎵 Play Music
+  </button>
+  <button id="musicToggle" style="background: rgba(0,0,0,0.8); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: none;">
+    🔊 Music: ON
+  </button>
+</div>
 
 <!-- START BUTTON -->
 <button id="startButton"
@@ -706,7 +716,25 @@
 </audio>
 </div>
 
+<audio id="QuestionRight">
+  <source src="sounds/question_right.mp3" type="audio/mpeg">
+</audio>
+</div>
 
+<audio id="QuestionWrong">
+  <source src="sounds/question_wrong.mp3" type="audio/mpeg">
+</audio>
+</div>
+
+<audio id="Away">
+  <source src="sounds/away.mp3" type="audio/mpeg">
+</audio>
+</div>
+
+<audio id="Medal">
+  <source src="sounds/medal.mp3" type="audio/mpeg">
+</audio>
+</div>
 
 
   <div id="map"></div>
@@ -1117,6 +1145,8 @@
         ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         openQuiz(gym);
       } else {
+        Away.currentTime = 0;
+        Away.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         toast(`Você está longe demais de ${gym.name}! Se aproxime mais.`, 'error');
       }
     });
@@ -1136,6 +1166,8 @@
         ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         openPOI(poi);
       } else {
+        Away.currentTime = 0;
+        Away.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         toast(`Você está longe demais de ${poi.name}! Se aproxime mais.`, 'error');
       }
     });
@@ -1174,6 +1206,8 @@
 
       // Próximo diálogo → depois quiz
       nextBtn.onclick = () => {
+        ButtonClick.currentTime = 0.45;
+        ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
         index++;
         if (index < gym.character.intro.length) {
           charText.textContent = gym.character.intro[index];
@@ -1210,16 +1244,25 @@
           btn.textContent = opt;
           btn.onclick = () => {
             if (i === q.answer) {
+              QuestionRight.onended = null;
+              QuestionRight.currentTime = 0;
+              QuestionRight.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
               toast("✅ Resposta correta!", 'success');
               currentQ++;
               if (currentQ < totalQ) {
                 loadQuestion();
               } else {
-                toast("Você conquistou " + gym.medal + "!", 'success');
-                awardMedal(gym.medal);
-                document.getElementById("quizModal").style.display = "none";
+                QuestionRight.onended = () => {
+                  Medal.currentTime = 0;
+                  Medal.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
+                  toast("Você conquistou " + gym.medal + "!", 'success');
+                  awardMedal(gym.medal);
+                  document.getElementById("quizModal").style.display = "none";
+                  };
               }
             } else {
+              QuestionWrong.currentTime = 0;
+              QuestionWrong.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
               toast("❌ Resposta errada. Tente novamente!", 'error');
             }
           };
@@ -1247,6 +1290,8 @@
     }
 
     document.getElementById("closePoiBtn").onclick = () => {
+      ButtonClick.currentTime = 0.45;
+      ButtonClick.play().catch(err => console.log('Erro ao reproduzir som do botão:', err));
       document.getElementById("poiModal").style.display = "none";
     };
 
@@ -1271,11 +1316,63 @@
     const closeTutorial = document.getElementById("closeTutorial");
     const menuAudio = document.getElementById("menuAudio");
     const startButtonSound = document.getElementById("startButtonSound");
+    const playMusicBtn = document.getElementById("playMusicBtn");
+    const musicToggle = document.getElementById("musicToggle");
 
-    // Iniciar reprodução do áudio do menu quando a página carrega
-    window.addEventListener('load', () => {
-      menuAudio.play().catch(err => console.log('Áudio não pode ser reproduzido automaticamente:', err));
-    });
+    // Check if user previously enabled music
+    const musicEnabled = localStorage.getItem('musicEnabled') === 'true';
+
+    // Show play button if music hasn't been enabled yet
+    if (!musicEnabled) {
+      playMusicBtn.style.display = 'block';
+    } else {
+      // Try to play music automatically for returning users
+      menuAudio.play().then(() => {
+        musicToggle.style.display = 'block';
+        updateMusicToggleButton();
+      }).catch(err => {
+        console.log('Auto-play failed, showing play button:', err);
+        playMusicBtn.style.display = 'block';
+      });
+    }
+
+    // Function to start music when play button is clicked
+    function playMusic() {
+      menuAudio.play().then(() => {
+        playMusicBtn.style.display = 'none';
+        musicToggle.style.display = 'block';
+        localStorage.setItem('musicEnabled', 'true');
+        updateMusicToggleButton();
+      }).catch(err => {
+        console.log('Failed to play music:', err);
+        alert('Unable to play music. Please check your browser settings.');
+      });
+    }
+
+    // Function to toggle music on/off
+    function toggleMusic() {
+      if (menuAudio.paused) {
+        menuAudio.play().catch(err => console.log('Failed to play music:', err));
+      } else {
+        menuAudio.pause();
+      }
+      updateMusicToggleButton();
+    }
+
+    // Update toggle button text
+    function updateMusicToggleButton() {
+      if (menuAudio.paused || menuAudio.muted) {
+        musicToggle.textContent = '🔇 Music: OFF';
+        musicToggle.style.background = 'rgba(255,0,0,0.8)';
+      } else {
+        musicToggle.textContent = '🔊 Music: ON';
+        musicToggle.style.background = 'rgba(0,0,0,0.8)';
+      }
+    }
+
+    // Add click handlers
+    playMusicBtn.onclick = playMusic;
+    musicToggle.onclick = toggleMusic;
 
     
     startButton.onclick = () => {
