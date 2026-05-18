@@ -574,6 +574,36 @@
         font-size: 0.95em !important;
         padding: 15px 20px !important;
       }
+      /* Music controls - mobile layout */
+      #menuAudio {
+        display: none !important;
+      }
+
+      #musicControls {
+        position: fixed !important;
+        bottom: 12px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 2600 !important;
+        gap: 8px !important;
+        background: rgba(0,0,0,0.55) !important;
+        padding: 6px 8px !important;
+        border-radius: 28px !important;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.55) !important;
+        align-items: center !important;
+      }
+
+      #musicControls button {
+        padding: 8px 10px !important;
+        font-size: 0.95rem !important;
+        border-radius: 999px !important;
+        min-width: 44px !important;
+        height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: none !important;
+      }
     }
 
     @media (max-width: 480px) {
@@ -949,7 +979,7 @@
         character: {
         name: "Albert Einstein",
         title: "Mestre da Física",
-        img: "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
+        img: "assets/Einstein.jpg",
         intro: [
           "Seja bem vindo ao Instituto de Física Gleb Wataghin (IFGW)! Eu sou Albert Einstein, vou ser seu guia nesta jornada.",
           "A física nos ajuda a entender como o universo funciona, das coisas mais pequenas como átomos até gigantescas como galáxias.",
@@ -984,7 +1014,7 @@
         character: {
         name: "Alan Turing",
         title: "O Pai da Computação",
-        img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Alan_Turing_%281951%29.jpg/500px-Alan_Turing_%281951%29.jpg",
+        img: "assets/Turing.jpg",
         intro: [
           "Seja bem vindo ao IC.",
           "Você sabia que apesar do Instituto ser criado em 1996, a computação já era presente na Unicamp desde 1969 com o curso de Bacharelado em Ciência da Computação que era oferecido pelo IMECC.",
@@ -994,23 +1024,101 @@
       },
         quiz: [
           {
-            q: "Consegue me dizer qual é velocidade da luz no vácuo?",
-            options: ["3 x 10^8 m/s", "1.5 x 10^7 m/s", "9.8 m/s^2"],
+            q: "Qual é a finalidade principal do algoritmo de ordenação 'QuickSort'?",
+            options: ["Ordenar dados de forma eficiente", "Pesquisar por um elemento", "Codificar informações"],
             answer: 0
           },
           {
-            q: "Qual das leis que eu propus descreve que toda ação exige uma reação?",
-            options: ["Primeira", "Segunda", "Terceira"],
-            answer: 2
+            q: "No IC3 há uma arte que me representa ao lado de uma outra figura que foi a responsável por escrever o primeiro algoritmo a ser processado por uma máquina?",
+            options: [
+              "Tim Berners-Lee",
+              "Grace Hopper",
+              "John von Neumann",
+              "Ada Lovelace",
+              "Donald Knuth",
+              "Margaret Hamilton"
+            ],
+            answer: 3
+          },
+          
+          {
+            q: "O que significa 'HTTP' na web?",
+            options: ["HyperText Transfer Protocol", "High Throughput Text Process", "Hyperlinking Text Transfer"],
+            answer: 0
           },
           {
-            q: "Na parte de tráz do IFGW em um corredor podemos encontrar a direita os quatro diferentes departamentos, tomando o sentido CB -> IFGW qual o departamento de Fisica Aplicada se encontra em qual porta?",
-            options: ["Primeira", "Segunda", "Terceira", "Quarta"],
-            answer: 3
+            q: "Em estruturas de dados, qual estrutura usa LIFO (Last In, First Out)?",
+            options: ["Fila (Queue)", "Pilha (Stack)", "Árvore (Tree)"],
+            answer: 1
           }
         ]
       },
-      
+      {
+        name: "IQ - Instituto de Química",
+        coords: [-22.818352, -47.068035],
+        medal: "Medalha de Química",
+        character: {
+          name: "Marie Curie",
+          title: "Pioneira da Radioatividade",
+          img: "assets/Marie.jpg",
+          intro: [
+            "Bem-vindo ao Instituto de Química (IQ)! Eu sou Marie Curie, e vou acompanhar você nesta exploração científica.",
+            "No IQ valorizamos a experimentação cuidadosa, a observação rigorosa e, acima de tudo, a segurança no laboratório.",
+            "Agora vamos testar seus conhecimentos sobre elementos, radioatividade e boas práticas de laboratório. Boa sorte!"
+          ]
+        },
+        quiz: [
+          {
+            q: "Qual é a unidade SI para quantidade de substância?",
+            options: ["Mol", "Grama", "Molécula"],
+            answer: 0
+          },
+          {
+            q: "Qual das seguintes é uma medida de acidez de uma solução?",
+            options: ["pH", "Molaridade", "Pressão"],
+            answer: 0
+          },
+          {
+            q: "Qual é a prática de segurança essencial ao trabalhar com substâncias voláteis no laboratório?",
+            options: ["Usar capela ventilada", "Deixar frascos abertos", "Misturar reagentes aleatoriamente"],
+            answer: 0
+          }
+        ]
+      },
+      /*
+      {
+        name: "IFCH - Instituto de Filosofia e Ciências Humanas",
+        coords: [-22.815277, -47.068401],
+        medal: "Medalha de Humanidades",
+        character: {
+          name: "Paulo Freire",
+          title: "Educador e Filósofo",
+          img: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Paulo_Freire_1977.jpg/500px-Paulo_Freire_1977.jpg",
+          intro: [
+            "Seja bem-vindo ao IFCH. Eu sou Paulo Freire e vamos conversar sobre humanidade, cultura e pensamento crítico.",
+            "O IFCH é um espaço para refletir sobre sociedade, história, educação e ética.",
+            "Agora respondas algumas perguntas que testam seu conhecimento nas ciências humanas."
+          ]
+        },
+        quiz: [
+          {
+            q: "O que estuda a disciplina de 'Epistemologia'?",
+            options: ["A natureza do conhecimento", "O estudo dos números", "A composição química"],
+            answer: 0
+          },
+          {
+            q: "Quem escreveu 'Pedagogia do Oprimido'?",
+            options: ["Paulo Freire", "Karl Marx", "Immanuel Kant"],
+            answer: 0
+          },
+          {
+            q: "Em ciências humanas, qual método é frequentemente usado para interpretar textos e contextos culturais?",
+            options: ["Análise hermenêutica", "Cromatografia", "Modelagem matemática"],
+            answer: 0
+          }
+        ]
+      },
+      */
       
       {
         name: "IMECC - Instituto de Matemática, Estatística Computação Científica",
@@ -1019,7 +1127,7 @@
         character: {
           name: "Pitágoras",
           title: "Guardião da Geometria",
-          img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Kapitolinischer_Pythagoras_adjusted.jpg/400px-Kapitolinischer_Pythagoras_adjusted.jpg",
+          img: "assets/Pythagoras.jpg",
           intro: [
             "Saudações viajante! Eu sou Pitágoras da cidade de Salmos.",
             "Bem vindo ao Instituto de Matemática, Estatística Computação Científica (IMECC), onde exploramos o fantástico mundo dos números.",
@@ -1077,7 +1185,7 @@
         character:{
           name: "Zeferino Vaz",
           title: "Patriarca da Unicamp",
-          img:"https://upload.wikimedia.org/wikipedia/commons/f/f5/Zeferino_Vaz_%28cropped%29.jpg",
+          img:"assets/Zeferino.jpg",
           intro: [
             "Bem vindo ao ultimo desafio. Meu nome é Zeferino Vaz, eu sou responsável pela construção da Unicamp",
             "Vejo que você provou ter conhecimentos das mais diversas áreas para chegar aqui, e ainda por cima é um bom observador",
@@ -1093,6 +1201,17 @@
               "As salas menores contém numeração menor e as salas maiores contém numeração maior ",
               "As salas menores e maiores tem numeração independentes umas das outras"
             ],
+            answer: 0
+          }
+          ,
+          {
+            q: "Qual espaço do campus costuma ser utilizado como ponto de encontro para manifestações estudantis e grandes assembleias?",
+            options: ["Ciclo Básico", "Praça das Bandeiras", "Restaurante Universitário (RU)"],
+            answer: 1
+          },
+          {
+            q: "Qual iniciativa costuma favorecer a integração social entre alunos de diferentes cursos e idades no campus?",
+            options: ["Atléticas e centros acadêmicos", "Somente disciplinas optativas", "Exclusivamente eventos online"],
             answer: 0
           }
         ],
@@ -1112,15 +1231,33 @@
   {
     name: "Ciclo Básico I (CB)",
     coords: [-22.817533 , -47.068635],
-    img: "https://www.basico.unicamp.br/wp-content/uploads/2022/05/cropped-Ciclo_Basico_UNICAMP_2015-e1653046999846.jpg",
+    img: 'assets/CB.jpg',
     text: "Inaugurado em 1972, o Ciclo Básico 1 é um conjunto de salas de uso multidisciplinar que é um ponto de convergência de alunos e professores de diversos cursos. Criando assim um ambiente heterogênio de ensino que permite com que os alunos não só aprofundem seus conhecimentos acadêmicos, como também estabeleçam laços profundos com seus colegas."
   },
   {
     name: "Restaurante Universitário (RU)",
     coords: [-22.817472, -47.071710],
-    img: "https://unicamp.br/unicamp/sites/default/files/2020-03/com_bandejao_20200323.jpg",
+    img: 'assets/RU.jpg',
     text: "Fundado em 1976, o Restaurante Universitário , que acabou ficando conhecido popularmente como Bandejão, se tornou uma parte vital da vida no campus. Promovendo uma alimentação acessível dentro do campus permite com que os alunos foquem seus esforços integralmente nos estudos"
+  },
+
+
+  {
+    name: "IC 3",
+    coords: [-22.813654443787836, -47.06403026174533],
+    img :'assets/IC3.jpg',
+    text:"Aqui estão localizados os laboratórios de ensino do instituto, um auditório, laboratórios de pesquisa e entidades estudantis. Aqui está localizado o Laboratório de Inteligência Artificial (IA), Recod.ai,fundado em 2010, com o objetivo de acolher e promover projetos de pesquisa na área de IA. E também temos o O Hub de Inteligência Artificial e Arquiteturas Cognitivas (H.IAAC) que tem o objetivo de desenvolver pesquisas para ampliar a capacidade cognitiva e de tomada de decisões de dispositivos móveis, como tablets e celulares, facilitando a vida dos usuários. "
+  },
+
+  {
+    name: "Teatro da Arena",
+    coords: [-22.816441418841052, -47.070398642004506],
+    img:'assets/Arena.jpg',
+    text:"O Teatro da Arena é um espaço cultural essencial no campus: além de sediar peças, oficinas e apresentações artísticas, funciona como um ponto de encontro que fortalece laços entre estudantes, docentes e a comunidade externa. Ao promover debates, espetáculos estudantis e eventos interdisciplinares, o teatro contribui para a formação crítica, o engajamento social e a construção de uma vida universitária mais plural e participativa. Muitas campanhas estudantis e atividades culturais utilizam esse espaço para ampliar vozes e fomentar trocas além da sala de aula."
+
   }
+
+
 ];
 
 
