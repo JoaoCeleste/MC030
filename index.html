@@ -923,24 +923,13 @@
     // Inicializar mapa Leaflet
     const map = L.map('map', {
       zoomControl: false,
-      attributionControl: false,
       minZoom: 17
     }).setView([-22.817, -47.068], 17);
 
-    // Camada de mapa
-    L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      attribution: ''
-    }).addTo(map);
-
-    // Definir os limites do campus UNICAMP
-    const campusBounds = L.latLngBounds([[-22.832833, -47.076034], [-22.813633, -47.056574]]);
-
-    // Camada colorida para o campus
-    L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      attribution: '',
-      bounds: campusBounds
+    // Camada de mapa sem dependência de chave de API
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 25,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
 
