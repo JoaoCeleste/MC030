@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Unicamp Map Game</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
   <link href="https://fonts.googleapis.com/css2?family=Righteous&display=swap" rel="stylesheet" />
   <style>
     body { margin: 0; padding: 0; background: #000; }
@@ -919,6 +920,8 @@
   </script>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.3/leaflet-maplibre-gl.js"></script>
   <script>
     // Inicializar mapa Leaflet
     const map = L.map('map', {
@@ -926,10 +929,12 @@
       minZoom: 17
     }).setView([-22.817, -47.068], 17);
 
-    // Camada de mapa sem dependência de chave de API
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 25,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    // Vetor com estilo sem ícones de pontos de interesse ou chave de API
+    L.maplibreGL({
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      attributionControl: {
+        customAttribution: '<a href="https://openfreemap.org">OpenFreeMap</a> | &copy; <a href="https://openmaptiles.org">OpenMapTiles</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }
     }).addTo(map);
 
 
